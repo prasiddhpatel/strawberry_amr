@@ -1,0 +1,9 @@
+cff-version: 1.2.0
+message: "If you use this software, please cite it as below."
+title: "Strawberry AMR: Autonomous Mobile Robot for Strawberry Plants Localization and Mappping"
+authors:
+  - family-names: "Patel"
+    given-names: "Prasiddh"
+url: "https://github.com/prasiddhpatel/strawberry_amr"
+version: 1.0.0
+date-released: 2026-08-27
