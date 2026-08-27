@@ -71,23 +71,16 @@ JetPack/Ubuntu version you need and why, and the one upgrade path that
 will break your board if you take it. **Then, for everything this
 workspace's authoring environment could never verify itself** (real
 CUDA/GPU inference, compiling the C++ safety node, real ROS 2
-integration tests, a real Gazebo RL training run) — see
-[`docs/CLAUDE_CODE_VERIFICATION_GUIDE.md`](docs/CLAUDE_CODE_VERIFICATION_GUIDE.md)
-for a structured plan and concrete prompts for closing those gaps with
-Claude Code running against the real hardware. This README is a
-reference/overview; those guides are the procedure.
-
+integration tests, a real Gazebo RL training run).
 ## Hardware
 
-Two supported compute topologies — pick the section of
-`docs/ORIN_PI_SPLIT_ARCHITECTURE.md` or the dual-Pi launch files that
-matches what you actually have:
+
 
 | Subsystem | Part |
 |---|---|
 | Battery | 3S LiPo, 11.1 V nominal |
 | Main power chain | main toggle → **E-stop (NC) in series** → protected VCC rail |
-| Compute | **Primary**: 1× Raspberry Pi 4B 4GB (on-robot I/O) + 1× **NVIDIA Jetson AGX Orin 64GB** (off-robot compute core, operator station, and visualization) — all sensors/actuation on the Pi, everything compute-heavy plus RViz2 on the Orin, linked by WiFi since the robot moves and the Orin doesn't. See `docs/ORIN_PI_SPLIT_ARCHITECTURE.md`. **Legacy**: 2× Raspberry Pi 4B (2GB + 4GB) linked by wired Ethernet, both on the robot — launch files retained, see `DEPLOYMENT_GUIDE.md`. Either way, ROS 2 Humble over CycloneDDS. |
+| Compute | **Primary**: 1× Raspberry Pi 4B 4GB (on-robot I/O) + 1× **NVIDIA Jetson AGX Orin 64GB** (off-robot compute core, operator station, and visualization) — all sensors/actuation on the Pi, everything compute-heavy plus RViz2 on the Orin, linked by WiFi since the robot moves and the Orin doesn't. See `docs/ORIN_PI_SPLIT_ARCHITECTURE.md`. * ROS 2 Humble over CycloneDDS. |
 | Chassis | Yahboom **ROSMASTER R2** — Ackermann (front-steer, rear-drive) |
 | Drive motors | 2× **JGB37-520** rear motors (11 PPR base × 1:19 gearbox = 836 CPR verified, 550±10 RPM) |
 | Steering | 1× **YB-P20M** digital servo (25 kg·cm), front axle |
@@ -132,18 +125,18 @@ layer complements it; it does not replace it.
 | Package | Type | Role | Runs on |
 |---|---|---|---|
 | `robot_description` | cmake | URDF/xacro (Ackermann: steering-knuckle front wheels, fixed rear), CAD-sourced geometry, `robot_state_publisher` | either |
-| `base_controller` | python | Wraps Yahboom's **Rosmaster_Lib** (vendored): `/cmd_vel`→`set_car_motion()`, `/wheel_odom` (from `get_motion_data()`), `/imu/data_raw`, `/battery_state`, `/wheel_encoders_raw` (diagnostic) + watchdog. Performs the Ackermann conversion itself, firmware-side — no separate bridge node | realtime (2GB) |
-| `sensor_bringup` | cmake | RPLIDAR A1M8 + IMU Madgwick filter (`lidar_imu.launch.py`); Astra camera (`camera.launch.py`) — split so either can be hosted on either Pi | split |
-| `row_navigation` | python | tabletop corridor (RANSAC, unchanged) + FOPID (unchanged) + **verified two-arc Ackermann "bulb turn"** headland maneuver → `/cmd_vel_auto` | realtime (2GB) |
-| `safety_supervisor` | cmake (C++) | **independent** forward obstacle gate → `/cmd_vel_safe`, `/e_stop`; scales v and ω together (preserves curvature) | realtime (2GB) |
-| `teleop_ps2` | python | PS2 joypad: deadman, e-stop, autonomy toggle → `/cmd_vel_teleop`. Deliberately separate from the autonomy/perception stack — see Section 4 | realtime (2GB) |
-| `plant_perception` | python | HSV ripe-fruit detector (RGB-D synced) → `/plant_targets` + debug overlay | mission brain (4GB) |
-| `semantic_mapper` | python | TF-project detections to `map`, log `semantic_targets.csv` (Phase 1's output, Phase 2's input) | mission brain (4GB) |
-| `target_manager` | python | **loads Phase 1's saved plant CSV at startup**, sequences it in row-order → `/selected_plant_goal` | mission brain (4GB) |
-| `coverage_planner` | python | boustrophedon route over all aisles → `/coverage_plan` (JSON) + `/coverage_path` (RViz) | mission brain (4GB) |
-| `mission_control` | python | mission sequencing (coverage + Nav2 approach, no arm hand-off) **plus the clean Orin command/status interface** (`/mission/command`, `/mission/status`) | mission brain (4GB) |
-| `robot_bringup` | cmake | EKF / SLAM (mapping + localization configs) / twist_mux / Nav2 (**Smac Hybrid planner + car-safe Regulated Pure Pursuit**) configs + all launch files | — |
-| `strawberry_amr_gazebo` | cmake | Gazebo Classic simulation: generated Irish-polytunnel world (`generate_polytunnel_world.py`), sim bringup launch. Dev Orin only — see `GAZEBO_SIMULATION_GUIDE.md` | dev Orin |
+| `base_controller` | python | Wraps Yahboom's **Rosmaster_Lib** (vendored): `/cmd_vel`→`set_car_motion()`, `/wheel_odom` (from `get_motion_data()`), `/imu/data_raw`, `/battery_state`, `/wheel_encoders_raw` (diagnostic) + watchdog. Performs the Ackermann conversion itself, firmware-side — no separate bridge node | realtime (4GB) |
+| `sensor_bringup` | cmake | RPLIDAR A1M8 + IMU Madgwick filter (`lidar_imu.launch.py`); Astra camera (`camera.launch.py`) — split so either can be hosted on either Pi | realtime (4GB) |
+| `row_navigation` | python | tabletop corridor (RANSAC, unchanged) + FOPID (unchanged) + **verified two-arc Ackermann "bulb turn"** headland maneuver → `/cmd_vel_auto` | realtime (4GB) |
+| `safety_supervisor` | cmake (C++) | **independent** forward obstacle gate → `/cmd_vel_safe`, `/e_stop`; scales v and ω together (preserves curvature) | realtime (4GB) |
+| `teleop_ps2` | python | PS2 joypad: deadman, e-stop, autonomy toggle → `/cmd_vel_teleop`. Deliberately separate from the autonomy/perception stack — see Section 4 | realtime (4GB) |
+| `plant_perception` | python | HSV ripe-fruit detector (RGB-D synced) → `/plant_targets` + debug overlay | mission brain (AGX Orin 64GB) |
+| `semantic_mapper` | python | TF-project detections to `map`, log `semantic_targets.csv` (Phase 1's output, Phase 2's input) | mission brain (AGX Orin 64GB) |
+| `target_manager` | python | **loads Phase 1's saved plant CSV at startup**, sequences it in row-order → `/selected_plant_goal` | mission brain (AGX Orin 64GB) |
+| `coverage_planner` | python | boustrophedon route over all aisles → `/coverage_plan` (JSON) + `/coverage_path` (RViz) | mission brain (AGX Orin 64GB) |
+| `mission_control` | python | mission sequencing (coverage + Nav2 approach, no arm hand-off) **plus the clean Orin command/status interface** (`/mission/command`, `/mission/status`) | mission brain (AGX Orin 64GB) |
+| `robot_bringup` | cmake | EKF / SLAM (mapping + localization configs) / twist_mux / Nav2 (**Smac Hybrid planner + car-safe Regulated Pure Pursuit**) configs + all launch files | mission brain (AGX Orin 64GB) |
+| `strawberry_amr_gazebo` | cmake | Gazebo Classic simulation: generated strawberry-polytunnel world (`generate_polytunnel_world.py`), sim bringup launch. Dev Orin only — see `GAZEBO_SIMULATION_GUIDE.md` | mission brain (AGX Orin 64GB) |
 
 ## 3. Command / safety chain
 
@@ -281,13 +274,6 @@ ros2 launch robot_bringup orin_explore_map_navigate.launch.py
 ros2 launch robot_bringup teleop.launch.py        # manual PS2 (start here)
 ros2 launch robot_bringup bench.launch.py         # indoor row-follow + SLAM, no camera/Nav2
 ros2 launch robot_bringup full_robot.launch.py    # full stack, single host
-```
-
-**Legacy (dual-Pi)** — see `DEPLOYMENT_GUIDE.md` for the full procedure:
-```bash
-ros2 launch robot_bringup pi_realtime.launch.py                     # 2GB Pi, both phases
-ros2 launch robot_bringup pi_missionbrain_phase1_mapping.launch.py  # 4GB Pi, Phase 1
-ros2 launch robot_bringup pi_missionbrain_phase2_nav.launch.py      # 4GB Pi, Phase 2
 ```
 
 Every command, start to finish, both topologies:
