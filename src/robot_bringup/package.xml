@@ -1,0 +1,41 @@
+<?xml version="1.0"?>
+<?xml-model href="http://download.ros.org/schema/package_format3.xsd" schematypens="http://www.w3.org/2001/XMLSchema"?>
+<package format="3">
+  <name>robot_bringup</name>
+  <version>0.1.0</version>
+  <description>robot_bringup for the strawberry tabletop AMR.</description>
+  <maintainer email="prasiddh@example.com">Prasiddh</maintainer>
+  <license>MIT</license>
+  <buildtool_depend>ament_cmake</buildtool_depend>
+  <depend>launch</depend>
+  <depend>launch_ros</depend>
+  <depend>robot_localization</depend>
+  <depend>slam_toolbox</depend>
+  <depend>twist_mux</depend>
+  <depend>nav2_bringup</depend>
+  <exec_depend>nav2_controller</exec_depend>
+  <exec_depend>nav2_planner</exec_depend>
+  <exec_depend>nav2_smac_planner</exec_depend>
+  <exec_depend>nav2_behaviors</exec_depend>
+  <exec_depend>nav2_bt_navigator</exec_depend>
+  <exec_depend>nav2_lifecycle_manager</exec_depend>
+  <exec_depend>nav2_regulated_pure_pursuit_controller</exec_depend>
+  <exec_depend>joy</exec_depend>
+  <exec_depend>coverage_planner</exec_depend>
+  <exec_depend>mission_control</exec_depend>
+  <exec_depend>row_navigation</exec_depend>
+  <exec_depend>safety_supervisor</exec_depend>
+  <exec_depend>base_controller</exec_depend>
+  <exec_depend>sensor_bringup</exec_depend>
+  <exec_depend>robot_description</exec_depend>
+  <exec_depend>teleop_ps2</exec_depend>
+  <exec_depend>plant_perception</exec_depend>
+  <exec_depend>semantic_mapper</exec_depend>
+  <exec_depend>target_manager</exec_depend>
+  <exec_depend>ament_index_python</exec_depend>
+  <test_depend>ament_lint_auto</test_depend>
+  <test_depend>ament_lint_common</test_depend>
+  <export>
+    <build_type>ament_cmake</build_type>
+  </export>
+</package>

@@ -1,0 +1,51 @@
+ekf_filter_node:
+  ros__parameters:
+    frequency: 30.0
+    two_d_mode: true
+    publish_tf: true
+    map_frame: map
+    odom_frame: odom
+    base_link_frame: base_link
+    world_frame: odom
+
+    # Wheel odometry: trust vx (rear-wheel-pair average speed) ONLY.
+    # Ackermann correction (was fusing yaw-rate here too, which was a
+    # leftover skid-steer assumption): for a skid-steer base, the rear
+    # wheel-speed difference IS a clean, direct proxy for yaw rate
+    # (omega = (v_r-v_l)/W). For THIS Ackermann chassis, the rear wheels
+    # are unsteered followers -- their speed split during a turn is a
+    # consequence of the bicycle-model curvature (and of mechanical slop
+    # in the front steering linkage, which is open-loop/unsensed -- see
+    # base_controller's set_car_motion() call), not an independent, trustworthy measurement of
+    # the vehicle's actual yaw rate. base_controller already labels this
+    # field "DIAGNOSTIC ONLY" for exactly this reason. The IMU gyro below
+    # is the SOLE fused yaw-rate source; do not re-enable vyaw fusion here
+    # without re-deriving why it would be trustworthy for this chassis.
+    odom0: /wheel_odom
+    odom0_config: [false, false, false,
+                   false, false, false,
+                   true,  false, false,
+                   false, false, false,
+                   false, false, false]
+    odom0_differential: false
+    odom0_relative: false
+
+    # IMU (MPU-9250, /imu/data after Madgwick): trust relative yaw + yaw-rate + accel.
+    # SOLE fused yaw-rate source for this chassis (see odom0_config note above).
+    # (magnetometer excluded upstream -> no absolute heading)
+    imu0: /imu/data
+    imu0_config: [false, false, false,
+                  false, false, true,
+                  false, false, false,
+                  false, false, true,
+                  true,  false, false]
+    imu0_differential: false
+    imu0_relative: true
+    imu0_remove_gravitational_acceleration: true
+
+    process_noise_covariance: [0.05, 0,    0,    0,    0,    0,
+                               0,    0.05, 0,    0,    0,    0,
+                               0,    0,    0.06, 0,    0,    0,
+                               0,    0,    0,    0.03, 0,    0,
+                               0,    0,    0,    0,    0.03, 0,
+                               0,    0,    0,    0,    0,    0.06]

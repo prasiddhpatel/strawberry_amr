@@ -1,0 +1,172 @@
+<?xml version="1.0"?>
+<robot xmlns:xacro="http://www.ros.org/wiki/xacro" name="strawberry_amr_sim">
+
+  <!-- =====================================================================
+       SIMULATION-ONLY overlay. Includes the real strawberry_amr.urdf.xacro
+       UNCHANGED (same links, same joints, same CAD-sourced geometry the
+       real robot uses) and adds Gazebo Classic plugins on top — the real
+       file itself is never touched by anything in this file, so there is
+       zero risk of a simulation-only change leaking into the real-hardware
+       description.
+
+       WHAT'S DIFFERENT IN SIMULATION vs. THE REAL ROBOT (read this before
+       expecting sim and real hardware to feel identical):
+       - Actuation: libgazebo_ros_ackermann_drive replaces base_controller's
+         Rosmaster_Lib call. It subscribes to the SAME /cmd_vel Twist
+         topic base_controller does on the real robot, and drives the SAME
+         joint names (rear_*_wheel_joint for propulsion,
+         front_*_wheel_steer_joint for steering) — so every node
+         upstream of the actuator (row_navigation, safety_supervisor,
+         twist_mux, Nav2's controller) needs ZERO changes to run against
+         either target. Only the very last hop differs, same principle as
+         the real robot's own base_controller/Rosmaster_Lib boundary.
+       - Sensing: libgazebo_ros_ray_sensor (LiDAR), libgazebo_ros_camera
+         (RGB-D), and libgazebo_ros_imu_sensor replace the real
+         rplidar_ros / astra_camera / Rosmaster_Lib IMU reads. Topic names
+         and message types match the real sensor_bringup nodes, so
+         row_navigation, plant_perception, the EKF, and slam_toolbox again
+         need no changes.
+       - What does NOT carry over faithfully: HSV-based perception
+         (plant_perception) depends on realistic colour and lighting, and
+         Gazebo Classic's rendering is not photorealistic — ripe-strawberry
+         detection in sim should be treated as a ROUGH functional check
+         (does a red object get detected roughly where it should), not a
+         validation of real-world HSV threshold tuning. Tune thresholds on
+         the real camera, not in simulation.
+  ===================================================================== -->
+
+  <xacro:include filename="$(find robot_description)/urdf/strawberry_amr.urdf.xacro"/>
+
+  <!-- ==== Ackermann drive plugin ====
+       Joint names match strawberry_amr.urdf.xacro's macros exactly (see
+       that file's rear_wheel/front_wheel macros). Publishes odometry on
+       /wheel_odom (SAME topic base_controller publishes on the real
+       robot) and broadcasts odom->base_link TF only if publish_odom_tf
+       is true — kept FALSE here, same reasoning as the real robot's
+       base_controller_params.yaml publish_tf default: the EKF
+       (robot_localization) should own that transform, not the drive
+       plugin directly, so both sim and real hardware feed the SAME
+       downstream fusion node the same way. -->
+  <gazebo>
+    <plugin name="ackermann_drive" filename="libgazebo_ros_ackermann_drive.so">
+      <ros>
+        <namespace></namespace>
+        <remapping>cmd_vel:=cmd_vel</remapping>
+        <remapping>odom:=wheel_odom</remapping>
+        <remapping>distance:=distance</remapping>
+      </ros>
+
+      <update_rate>50</update_rate>
+
+      <!-- drive (rear) wheels -->
+      <left_joint>rear_left_wheel_joint</left_joint>
+      <right_joint>rear_right_wheel_joint</right_joint>
+      <!-- steering (front) knuckles -->
+      <left_steering_joint>front_left_wheel_steer_joint</left_steering_joint>
+      <right_steering_joint>front_right_wheel_steer_joint</right_steering_joint>
+      <!-- free-spinning front wheel rotation (visual only, not driven) -->
+      <right_steering_link_name>front_right_wheel_steer_link</right_steering_link_name>
+      <left_steering_link_name>front_left_wheel_steer_link</left_steering_link_name>
+
+      <!-- CAD-sourced geometry — MUST match strawberry_amr.urdf.xacro's
+           xacro:property values; see docs/MOTOR_AND_GEOMETRY_VERIFICATION.md -->
+      <max_steer>0.6</max_steer>            <!-- delta_max, rad -->
+      <max_steering_angle>0.6</max_steering_angle>
+      <wheel_separation>0.1685</wheel_separation>   <!-- rear_track -->
+      <wheel_diameter>0.065</wheel_diameter>
+      <wheelbase>0.2353</wheelbase>
+
+      <max_wheel_torque>2.0</max_wheel_torque>
+      <max_wheel_acceleration>3.0</max_wheel_acceleration>
+
+      <publish_odom>true</publish_odom>
+      <publish_odom_tf>false</publish_odom_tf>       <!-- EKF owns this, see above -->
+      <publish_wheel_tf>true</publish_wheel_tf>
+
+      <odometry_frame>odom</odometry_frame>
+      <robot_base_frame>base_link</robot_base_frame>
+    </plugin>
+  </gazebo>
+
+  <!-- ==== LiDAR (mimics RPLIDAR A1M8: 360 deg, ~12m, ~1 deg resolution —        see docs/MOTOR_AND_GEOMETRY_VERIFICATION.md for the real specs this
+       approximates) ==== -->
+  <gazebo reference="laser">
+    <sensor type="ray" name="lidar_sensor">
+      <pose>0 0 0 0 0 0</pose>
+      <visualize>false</visualize>
+      <update_rate>10</update_rate>
+      <ray>
+        <scan>
+          <horizontal>
+            <samples>360</samples>
+            <resolution>1</resolution>
+            <min_angle>-3.14159</min_angle>
+            <max_angle>3.14159</max_angle>
+          </horizontal>
+        </scan>
+        <range>
+          <min>0.15</min>
+          <max>12.0</max>
+          <resolution>0.01</resolution>
+        </range>
+        <noise>
+          <type>gaussian</type>
+          <mean>0.0</mean>
+          <stddev>0.01</stddev>
+        </noise>
+      </ray>
+      <plugin name="lidar_plugin" filename="libgazebo_ros_ray_sensor.so">
+        <ros>
+          <remapping>~/out:=scan</remapping>
+        </ros>
+        <output_type>sensor_msgs/LaserScan</output_type>
+        <frame_name>laser</frame_name>
+      </plugin>
+    </sensor>
+  </gazebo>
+
+  <!-- ==== RGB-D camera (mimics Orbbec Astra Pro Plus: colour + depth,
+       registered) ==== -->
+  <gazebo reference="camera_link">
+    <sensor type="depth" name="camera_sensor">
+      <update_rate>15</update_rate>
+      <camera>
+        <horizontal_fov>1.047</horizontal_fov>
+        <image><width>640</width><height>480</height><format>R8G8B8</format></image>
+        <clip><near>0.1</near><far>8.0</far></clip>
+      </camera>
+      <plugin name="camera_plugin" filename="libgazebo_ros_camera.so">
+        <ros>
+          <namespace>camera</namespace>
+        </ros>
+        <camera_name>camera</camera_name>
+        <frame_name>camera_link</frame_name>
+        <!-- topic names chosen to match sensor_bringup/camera.launch.py's
+             real Astra driver topics exactly, so plant_perception needs
+             no remapping between sim and real hardware -->
+        <image_topic_name>color/image_raw</image_topic_name>
+        <camera_info_topic_name>color/camera_info</camera_info_topic_name>
+        <depth_image_topic_name>depth/image_raw</depth_image_topic_name>
+        <depth_image_camera_info_topic_name>depth/camera_info</depth_image_camera_info_topic_name>
+        <point_cloud_topic_name>depth/points</point_cloud_topic_name>
+        <hack_baseline>0.07</hack_baseline>
+      </plugin>
+    </sensor>
+  </gazebo>
+
+  <!-- ==== IMU (mimics the MPU-9250 raw output on /imu/data_raw — the
+       SAME topic imu_filter_madgwick already consumes on the real robot,
+       so the Madgwick filter node runs unmodified in sim too) ==== -->
+  <gazebo reference="imu_link">
+    <sensor type="imu" name="imu_sensor">
+      <update_rate>50</update_rate>
+      <plugin name="imu_plugin" filename="libgazebo_ros_imu_sensor.so">
+        <ros>
+          <remapping>~/out:=imu/data_raw</remapping>
+        </ros>
+        <frame_name>imu_link</frame_name>
+      </plugin>
+    </sensor>
+  </gazebo>
+
+</robot>

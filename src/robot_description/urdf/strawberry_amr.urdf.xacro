@@ -1,0 +1,231 @@
+<?xml version="1.0"?>
+<robot name="strawberry_amr" xmlns:xacro="http://ros.org/wiki/xacro">
+
+  <!-- =====================================================================
+       Ackermann (ROSMASTER R2 chassis) AMR — kinematic chain.
+
+       DIMENSION SOURCING — this changed since the last revision of this
+       file. The earlier "no CAD file exists, these are unverified
+       placeholders" note is now OUTDATED: the operator supplied
+       ROSMASTER_R2_robot_sample_codes.zip, which contains
+       yahboomcar_description/urdf/yahboomcar_R2.urdf.xacro — a genuine
+       SolidWorks-to-URDF-Exporter output (see that file's own header
+       comment) with real STL meshes, not a placeholder. The values below
+       are extracted directly from that file's joint origins and limits,
+       which is a materially better source than the previous "carried
+       forward from an unverified source" numbers.
+
+       EXTRACTION (all from yahboomcar_R2.urdf.xacro joint <origin>/<limit>
+       tags, computed straightforwardly from the coordinates — see the
+       arithmetic in git history if you want to re-derive it):
+         wheelbase (L): front_left_steer_joint.origin.x (0.11922) minus
+           back_left_joint.origin.x (-0.11607) = 0.23529 m
+         front_track: front_left_steer_joint.origin.y (0.065) minus
+           front_right_steer_joint.origin.y (-0.065) = 0.130 m
+         rear_track: back_left_joint.origin.y (0.08425) minus
+           back_right_joint.origin.y (-0.08425) = 0.1685 m (this
+           independently corroborates a "~0.169m" figure that appeared in
+           other pasted material with no primary source at the time —
+           now it has one, and the two agree to within 1.5mm)
+         max_steer: <limit lower="-0.6" upper="0.6"/> on both
+           front_*_steer_joint — 0.6 rad, 34.4 deg
+         R_min = L/tan(max_steer) = 0.2353/tan(0.6) = 0.344 m — cross-
+           checked against the JGB37-520's rated 550 RPM and the firmware's
+           own set_car_motion vx=1.8 m/s limit (Rosmaster_Lib.py): 1.8 m/s
+           at 65mm-diameter wheels implies ~529 RPM, consistent with (and
+           slightly conservative relative to) the motor's 550+/-10 RPM
+           rating — a real, independent sanity check that these numbers
+           hang together correctly.
+
+       REMAINING CAVEAT, stated plainly rather than hidden: a CAD joint
+       limit is a DESIGN value, not a guarantee about YOUR specific
+       assembled unit — servo travel, linkage slop, and assembly
+       tolerance can all shift the REAL achievable max_steer slightly.
+       This is a much better starting point than the old placeholder, but
+       still worth a 2-minute bench confirmation (drive to full lock, check
+       with a protractor) per docs/SENSOR_CALIBRATION_AND_BRINGUP_GUIDE.md
+       Part 1 before you fully trust R_min-derived headland-turn geometry
+       for unattended operation.
+
+       wheel diameter (65mm, radius 0.0325m) remains independently
+       corroborated by Yahboom's own Q&A on the R2 product page (separate
+       source from the CAD file, same answer) — the most trustworthy
+       figure of the set.
+
+       Update the `xacro:property` values below AND the matching params in
+       row_navigation_params.yaml together if you ever re-derive these
+       (e.g. after a bench confirmation that shifts max_steer slightly).
+       base_len/base_wid/base_hgt/clearance below are still a body-envelope
+       ESTIMATE, not extracted from the real URDF's mesh bounding box —
+       fine for a rough Nav2 footprint, but if you need a precise
+       collision model, the real meshes are the better source (see
+       yahboomcar_description/meshes/Ackermann/*.STL in the sample zip).
+  ===================================================================== -->
+
+  <xacro:property name="wheelbase"    value="0.2353"/>  <!-- L, CAD-sourced (see header) -->
+  <xacro:property name="front_track"  value="0.130"/>   <!-- CAD-sourced (see header) -->
+  <xacro:property name="rear_track"   value="0.1685"/>  <!-- CAD-sourced (see header) -->
+  <xacro:property name="wheel_r"      value="0.0325"/>  <!-- 65mm tyre, corroborated by Yahboom Q&A -->
+  <xacro:property name="wheel_w"      value="0.026"/>
+  <xacro:property name="max_steer"    value="0.6"/>     <!-- delta_max, CAD joint limit (see header) -->
+
+  <!-- body envelope: ESTIMATE, see header note -->
+  <xacro:property name="base_len"     value="0.320"/>
+  <xacro:property name="base_wid"     value="0.200"/>
+  <xacro:property name="base_hgt"     value="0.100"/>
+  <xacro:property name="clearance"    value="0.020"/>
+  <xacro:property name="total_mass"   value="2.76"/>    <!-- verified system mass budget -->
+
+  <!-- sensor mounts (EDIT after calibration on the real chassis) -->
+  <xacro:property name="lidar_x"      value="0.120"/>
+  <xacro:property name="lidar_z"      value="0.140"/>
+  <xacro:property name="imu_z"        value="0.050"/>
+  <xacro:property name="mast_x"       value="0.050"/>
+  <xacro:property name="mast_z"       value="0.450"/>   <!-- camera height on mast -->
+  <xacro:property name="cam_tilt"     value="0.61"/>    <!-- ~35 deg UP toward overhead fruit -->
+
+  <material name="grey"><color rgba="0.3 0.3 0.3 1"/></material>
+  <material name="black"><color rgba="0.05 0.05 0.05 1"/></material>
+  <material name="green"><color rgba="0.1 0.6 0.2 1"/></material>
+  <material name="red"><color rgba="0.7 0.1 0.1 1"/></material>
+
+  <!-- ===== base ===== -->
+  <!-- base_link origin = wheelbase midpoint, ground-projected at base_footprint -->
+  <link name="base_link">
+    <visual>
+      <geometry><box size="${base_len} ${base_wid} ${base_hgt}"/></geometry>
+      <material name="green"/>
+    </visual>
+    <collision>
+      <geometry><box size="${base_len} ${base_wid} ${base_hgt}"/></geometry>
+    </collision>
+    <inertial>
+      <mass value="${total_mass - 4*0.10}"/>  <!-- body mass = total minus 4 wheels (approx 0.10 kg each: motor+tyre+hub) -->
+      <inertia ixx="0.012" ixy="0" ixz="0" iyy="0.020" iyz="0" izz="0.025"/>
+    </inertial>
+  </link>
+
+  <link name="base_footprint"/>
+  <joint name="base_footprint_joint" type="fixed">
+    <parent link="base_link"/>
+    <child link="base_footprint"/>
+    <origin xyz="0 0 ${-(base_hgt/2 + clearance + wheel_r - base_hgt/2)}"/>
+  </joint>
+
+  <!-- =====================================================================
+       Drivetrain: REAR wheels are driven, unsteered (continuous joints
+       directly on base_link). FRONT wheels are steered (revolute "knuckle"
+       joint, limited to +/- max_steer) with a child continuous wheel joint
+       for rolling. This is the standard URDF pattern for a 4-wheel
+       Ackermann vehicle and is what lets RViz/joint_state_publisher show
+       the commanded steering angle correctly if a future joint_state
+       publisher node is added (NOT currently wired up; see README. The
+       actual robot motion does not depend on this; it is visualization
+       fidelity only.)
+  ===================================================================== -->
+  <xacro:macro name="wheel_visual" params="name">
+    <link name="${name}">
+      <visual>
+        <origin rpy="1.5708 0 0"/>
+        <geometry><cylinder radius="${wheel_r}" length="${wheel_w}"/></geometry>
+        <material name="black"/>
+      </visual>
+      <collision>
+        <origin rpy="1.5708 0 0"/>
+        <geometry><cylinder radius="${wheel_r}" length="${wheel_w}"/></geometry>
+      </collision>
+      <inertial>
+        <mass value="0.10"/>
+        <inertia ixx="0.00006" ixy="0" ixz="0" iyy="0.00006" iyz="0" izz="0.00010"/>
+      </inertial>
+    </link>
+  </xacro:macro>
+
+  <!-- REAR wheels: driven, fixed steering (continuous spin only) -->
+  <xacro:macro name="rear_wheel" params="name y">
+    <xacro:wheel_visual name="${name}"/>
+    <joint name="${name}_joint" type="continuous">
+      <parent link="base_link"/>
+      <child link="${name}"/>
+      <origin xyz="${-wheelbase/2} ${y} ${-(base_hgt/2 - wheel_r)}" rpy="0 0 0"/>
+      <axis xyz="0 1 0"/>
+    </joint>
+  </xacro:macro>
+  <xacro:rear_wheel name="rear_left_wheel"  y="${ rear_track/2}"/>
+  <xacro:rear_wheel name="rear_right_wheel" y="${-rear_track/2}"/>
+
+  <!-- FRONT wheels: steering knuckle (revolute, +/- max_steer) -> wheel (continuous) -->
+  <xacro:macro name="front_wheel" params="name y">
+    <link name="${name}_steer_link">
+      <inertial>
+        <mass value="0.02"/>
+        <inertia ixx="0.000005" ixy="0" ixz="0" iyy="0.000005" iyz="0" izz="0.000005"/>
+      </inertial>
+    </link>
+    <joint name="${name}_steer_joint" type="revolute">
+      <parent link="base_link"/>
+      <child link="${name}_steer_link"/>
+      <origin xyz="${wheelbase/2} ${y} ${-(base_hgt/2 - wheel_r)}" rpy="0 0 0"/>
+      <axis xyz="0 0 1"/>
+      <limit lower="${-max_steer}" upper="${max_steer}" effort="2.0" velocity="3.0"/>
+    </joint>
+    <xacro:wheel_visual name="${name}"/>
+    <joint name="${name}_joint" type="continuous">
+      <parent link="${name}_steer_link"/>
+      <child link="${name}"/>
+      <origin xyz="0 0 0" rpy="0 0 0"/>
+      <axis xyz="0 1 0"/>
+    </joint>
+  </xacro:macro>
+  <xacro:front_wheel name="front_left_wheel"  y="${ front_track/2}"/>
+  <xacro:front_wheel name="front_right_wheel" y="${-front_track/2}"/>
+
+  <!-- ===== LiDAR (RPLIDAR A1M8 — corrected from an earlier C1 assumption;
+       operator confirmed this is the actual unit shipped in the Yahboom kit) =====
+       Visual cylinder sized to the real A1M8 envelope (~98.5 x 70 x 60mm per
+       multiple corroborating vendor listings for the R6 revision — Slamtec
+       does not publish exact tolerances, so this bounding-cylinder approximation
+       is for RViz/collision-checking only, not a precision mechanical model. -->
+  <link name="laser">
+    <visual>
+      <geometry><cylinder radius="0.049" length="0.060"/></geometry>
+      <material name="grey"/>
+    </visual>
+  </link>
+  <joint name="laser_joint" type="fixed">
+    <parent link="base_link"/>
+    <child link="laser"/>
+    <origin xyz="${lidar_x} 0 ${lidar_z}"/>
+  </joint>
+
+  <!-- ===== IMU (MPU-9250, onboard the YB-ERF01-V2.0 over I2C) ===== -->
+  <link name="imu_link"/>
+  <joint name="imu_joint" type="fixed">
+    <parent link="base_link"/>
+    <child link="imu_link"/>
+    <origin xyz="0 0 ${imu_z}"/>
+  </joint>
+
+  <!-- ===== camera mast, tilted UP toward overhead fruit ===== -->
+  <link name="camera_link">
+    <visual>
+      <geometry><box size="0.03 0.09 0.025"/></geometry>
+      <material name="black"/>
+    </visual>
+  </link>
+  <joint name="camera_joint" type="fixed">
+    <parent link="base_link"/>
+    <child link="camera_link"/>
+    <!-- negative pitch tilts the optical axis upward -->
+    <origin xyz="${mast_x} 0 ${mast_z}" rpy="0 ${-cam_tilt} 0"/>
+  </joint>
+
+  <!-- optical frame (REP-103: z forward, x right, y down) -->
+  <link name="camera_depth_optical_frame"/>
+  <joint name="camera_depth_optical_joint" type="fixed">
+    <parent link="camera_link"/>
+    <child link="camera_depth_optical_frame"/>
+    <origin xyz="0 0 0" rpy="-1.5708 0 -1.5708"/>
+  </joint>
+
+</robot>

@@ -1,0 +1,20 @@
+coverage_planner_node:
+  ros__parameters:
+    num_rows: 6            # number of aisles to cover
+    row_spacing: 0.50      # lateral spacing between aisle centrelines (m)
+    row_length: 8.0        # drivable length of each aisle (m)
+    origin_x: 0.0          # x of the row-entry end (m, map frame)
+    first_row_y: 0.0       # y of aisle 0 centreline (m, map frame)
+    # NOTE: this is a SCHEMATIC route-preview margin for the RViz /coverage_path
+    # visualisation and mission sequencing, NOT the real clearance the vehicle
+    # needs -- that is owned by row_navigation's bulb-turn (see
+    # docs/HEADLAND_TURN_GEOMETRY.md, which computes ~1.22 m of REQUIRED real
+    # headland depth for this Ackermann chassis at row_spacing=0.50 m: exit
+    # buffer + two-arc forward extent + vehicle-length margin -- an earlier
+    # revision of that document estimated ~1.7 m; superseded, see
+    # docs/CURRENT_STATUS_AND_NEXT_STEPS.md). This 0.6 m figure only needs to
+    # look reasonable on screen; verify the ACTUAL tunnel headland against
+    # the 1.22 m figure before autonomous operation, not against this one.
+    headland_margin: 0.6   # distance driven past row end before turning (m) -- SCHEMATIC ONLY, see note
+    map_frame: map
+    republish_period: 2.0

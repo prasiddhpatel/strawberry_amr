@@ -1,0 +1,43 @@
+# Velocity arbitration -- AUTONOMOUS BEHAVIOURS ONLY (Orin-side stage).
+#
+# CHANGED: teleop is no longer arbitrated here. It used to be (highest
+# priority, 100), but that meant a human's PS2 command had to round-trip
+# over the Pi<->Orin network to reach this node before it could reach
+# the motors at all -- defeating the point of a LOCAL manual override
+# during a network drop. Teleop now has its own, second arbitration stage
+# that runs locally on the Pi (see twist_mux_pi_local.yaml) and is
+# genuinely independent of this node, this Orin, and the network link.
+# This file now only decides BETWEEN autonomous behaviours; the Pi-local
+# stage decides human-override vs. whatever this stage outputs.
+#
+#   navigation   (20) : Nav2 plant-approach (/cmd_vel_nav); only publishes while
+#                       an approach goal is active, so it is silent during rows
+#   row_follow   (10) : reactive row following, AFTER the safety supervisor gate
+#   e_stop lock (255) : latched emergency stop overrides everything -- kept
+#                       here too (in addition to the Pi-local stage's own
+#                       lock) so autonomy stops COMPUTING pointless commands
+#                       at the source, not just having them discarded later;
+#                       redundant locking across both stages is a deliberate
+#                       belt-and-suspenders choice, not an oversight.
+#
+# Because Nav2 (20) outranks row-following (10), Nav2 owns velocity during an
+# approach; when no goal is active /cmd_vel_nav times out and row-following wins.
+# Output remapped to /cmd_vel_remote (crosses the network to the Pi) --
+# NOT /cmd_vel anymore; that name is now reserved for the Pi-local stage's
+# own output, which is what base_controller actually subscribes to.
+twist_mux:
+  ros__parameters:
+    topics:
+      navigation:
+        topic: /cmd_vel_nav
+        timeout: 0.5
+        priority: 20
+      row_follow:
+        topic: /cmd_vel_safe
+        timeout: 0.5
+        priority: 10
+    locks:
+      e_stop:
+        topic: /e_stop
+        timeout: 0.0
+        priority: 255

@@ -1,0 +1,37 @@
+plant_detector_node:
+  ros__parameters:
+    # ---- topics (must match sensor_bringup/camera.launch.py's real Astra
+    # topics, or the Gazebo camera plugin's -- see strawberry_amr_sim.urdf.xacro) ----
+    color_topic: /camera/color/image_raw
+    depth_topic: /camera/depth/image_raw
+    info_topic: /camera/color/camera_info
+    depth_optical_frame: camera_depth_optical_frame
+
+    # ---- ripe-strawberry HSV thresholds (OpenCV H: 0-179, S/V: 0-255).
+    # Red wraps around 0/180, so TWO ranges are combined -- see
+    # docs/CAMERA_ANGLE_AND_HSV_CALIBRATION_GUIDE.md for the full tuning
+    # procedure and exactly how to find your own values with hsv_tuner
+    # (rqt_image_view + this node's own debug overlay). These are a
+    # reasonable STARTING POINT for a bright, saturated ripe-red berry
+    # under normal indoor lighting -- NOT tuned against your actual camera
+    # or lighting yet, same status as every other "measure this yourself"
+    # value in this workspace. ----
+    h1_lo: 0        # lower red band: hue lower bound
+    h1_hi: 10       # lower red band: hue upper bound
+    h2_lo: 170      # upper red band: hue lower bound
+    h2_hi: 179      # upper red band: hue upper bound
+    s_lo: 90        # shared saturation floor (filters washed-out/pink noise)
+    v_lo: 60        # shared value/brightness floor (filters near-black shadow)
+
+    # ---- detection filtering ----
+    min_contour_area: 600      # px^2; raise if small false positives appear,
+                                # lower if distant/small berries are missed
+    roi_top_fraction: 0.0      # 0 = full image; e.g. 0.6 keeps only the top
+                                # 60% of the frame -- useful once cam_tilt is
+                                # confirmed, to exclude the bare aisle floor
+                                # from ever being scanned for red pixels
+    depth_min_m: 0.15
+    depth_max_m: 3.0
+
+    publish_debug: true        # publishes the annotated overlay image this
+                                # guide's tuning procedure displays

@@ -1,0 +1,57 @@
+# Velocity arbitration -- HUMAN OVERRIDE vs. AUTONOMY (Pi-local stage).
+#
+# This is the SECOND, Pi-local twist_mux instance -- see
+# docs/ORIN_PI_SPLIT_ARCHITECTURE.md for the full two-stage design and
+# why it exists. Both of this node's real inputs are meaningful without
+# the network: /cmd_vel_teleop is published locally on THIS Pi by
+# joystick_node, and /cmd_vel_remote is whatever arrived from the
+# Orin's own twist_mux (see twist_mux.yaml) -- if the network is down,
+# that second input simply goes stale and drops out of contention on its
+# own, exactly like any other twist_mux input timeout; no special-casing
+# needed.
+#
+#   teleop  (100) : human joypad -- ALWAYS wins over autonomy when active
+#                   (deadman held on the PS2 pad). This decision is made
+#                   ENTIRELY on this Pi: it does not matter whether the
+#                   Orin or the network link are reachable at all.
+#   remote   (10) : whatever the Orin's own twist_mux already decided
+#                   between Nav2 and row-following, having crossed the
+#                   network. If the network is down, this input times out
+#                   (0.5s) and simply stops competing -- same effect as
+#                   before this two-stage split existed.
+#   e_stop lock (255) : latched emergency stop overrides everything.
+#                   Critically, joystick_node's own /e_stop publish
+#                   (the PS2 pad's e-stop button) reaches THIS lock with
+#                   ZERO network dependency -- a genuine safety IMPROVEMENT
+#                   over the single-stage design: previously even the
+#                   physical button's software e-stop had to round-trip
+#                   through the Orin. safety_supervisor's own
+#                   obstacle-triggered /e_stop (Orin-side) also reaches
+#                   this lock, but only when the network is up -- that
+#                   specific protection cannot function during a network
+#                   drop, by the nature of the network being down, and no
+#                   amount of local arbitration changes that. Know this
+#                   before relying on manual override during a drop: you
+#                   are driving without obstacle-based software gating in
+#                   that specific scenario, on top of the deadman
+#                   requirement and the always-independent physical e-stop.
+#
+# Output remapped to /cmd_vel -- what base_controller has always
+# subscribed to; base_controller itself needed ZERO changes for this
+# whole redesign.
+twist_mux_pi_local:
+  ros__parameters:
+    topics:
+      teleop:
+        topic: /cmd_vel_teleop
+        timeout: 0.5
+        priority: 100
+      remote:
+        topic: /cmd_vel_remote
+        timeout: 0.5
+        priority: 10
+    locks:
+      e_stop:
+        topic: /e_stop
+        timeout: 0.0
+        priority: 255

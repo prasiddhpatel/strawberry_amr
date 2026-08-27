@@ -1,0 +1,13 @@
+target_manager_node:
+  ros__parameters:
+    map_frame: map
+    base_frame: base_link
+    dedup_grid_m: 0.15
+    reach_radius_m: 0.10
+    # MUST match coverage_planner's and row_navigation's row_spacing -- same
+    # cross-file constraint as documented in docs/HEADLAND_TURN_GEOMETRY.md.
+    row_spacing: 0.50
+    # Phase 1's semantic_mapper output -- MUST match semantic_mapper's csv_path
+    # (same default here, but set explicitly in both places rather than
+    # relying on the defaults happening to agree).
+    initial_csv_path: "~/ros2_ws/maps/semantic_targets.csv"

@@ -1,0 +1,43 @@
+<?xml version="1.0"?>
+<package format="3">
+  <name>r2_web_viz</name>
+  <version>0.1.0</version>
+  <description>
+    Browser-based live visualization for the R2 robot: 2D map with real and
+    assumed trajectory, a persistent map-frame RGB point-cloud
+    reconstruction, and a live camera stream. Serves a static web frontend
+    and wires together rosbridge_suite, web_video_server and
+    depth_image_proc so any browser on the robot's LAN (the Orin's own
+    monitor, or a phone) can view it, plus one real node of its own --
+    map_accumulator_node -- that fuses the raw per-frame point cloud into
+    a persistent map-frame reconstruction via tf2 and republishes a
+    properly-composed map-frame robot pose. See
+    launch/web_viz.launch.py and map_accumulator_node.py's own docstring
+    for what's off-the-shelf ROS 2 tooling versus genuinely new code.
+  </description>
+  <maintainer email="prasiddh@example.com">Prasiddh</maintainer>
+  <license>MIT</license>
+  <buildtool_depend>ament_python</buildtool_depend>
+
+  <depend>rclpy</depend>
+  <depend>tf2_ros</depend>
+  <depend>sensor_msgs</depend>
+  <depend>sensor_msgs_py</depend>
+  <depend>geometry_msgs</depend>
+  <depend>std_msgs</depend>
+  <depend>python3-numpy</depend>
+
+  <exec_depend>rosbridge_server</exec_depend>
+  <exec_depend>web_video_server</exec_depend>
+  <exec_depend>depth_image_proc</exec_depend>
+  <exec_depend>rclcpp_components</exec_depend>
+
+  <test_depend>ament_copyright</test_depend>
+  <test_depend>ament_flake8</test_depend>
+  <test_depend>ament_pep257</test_depend>
+  <test_depend>python3-pytest</test_depend>
+
+  <export>
+    <build_type>ament_python</build_type>
+  </export>
+</package>

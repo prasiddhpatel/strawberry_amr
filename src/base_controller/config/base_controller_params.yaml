@@ -1,0 +1,39 @@
+base_controller_node:
+  ros__parameters:
+    # ---- serial link to YB-ERF01-V2.0, via Rosmaster_Lib (vendored --
+    # see base_controller/vendor/Rosmaster_Lib.py). The library owns the
+    # actual wire protocol and baud rate (115200, fixed inside the library
+    # itself, not configurable here) -- this node only needs the port. ----
+    serial_port: /dev/myserial   # matches Rosmaster_Lib's own default name;
+                                  # see scripts/setup_udev_rules.sh, which
+                                  # creates this symlink
+    poll_rate_hz: 20.0           # odometry/IMU/battery/encoder publish rate
+
+    # ---- command limits (also firmware-enforced inside set_car_motion,
+    # these are a defensive clamp before the command ever reaches it) ----
+    max_linear_mps: 1.8          # R2/R2L set_car_motion vx range, confirmed
+                                  # from Rosmaster_Lib.py's own docstring
+    max_angular_radps: 3.0       # R2/R2L set_car_motion vz range, ditto
+
+    # ---- TF ----
+    publish_tf: false            # leave false when an EKF (robot_localization)
+                                  # is running -- it should own odom->base_link.
+                                  # Only set true for a bench test of this node
+                                  # in isolation with nothing else publishing TF.
+    base_frame: base_link
+    odom_frame: odom
+
+    # ---- safety ----
+    cmd_watchdog_timeout_s: 0.5  # s   no /cmd_vel within this -> stop the robot
+    max_linear_accel_mps2: 1.0   # see command_safety.py's module docstring --
+                                  # NEVER limits deceleration/braking, only
+                                  # increasing |velocity|. Generous relative to
+                                  # actual operating speeds (row-following/
+                                  # headland are 0.06-0.35 m/s); exists to catch
+                                  # a sudden, erroneous full-speed step command.
+    battery_warn_v: 9.6          # V   3S LiPo warn threshold (3.2 V/cell)
+    battery_critical_v: 9.0      # V   3S LiPo critical threshold (3.0 V/cell)
+                                  # Scale factor confirmed from Rosmaster_Lib
+                                  # source: get_battery_voltage() returns
+                                  # raw_register / 10.0 -- see base_controller_node.py's
+                                  # module docstring for the full verification trail.

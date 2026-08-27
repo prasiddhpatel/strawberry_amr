@@ -1,0 +1,6 @@
+link_monitor_node:
+  ros__parameters:
+    max_silence_sec: 3.0   # generous margin -- awareness signal, not a fast
+                            # safety timeout; see link_monitor_node.py's own
+                            # docstring for why this doesn't need to be fast
+    check_rate_hz: 2.0

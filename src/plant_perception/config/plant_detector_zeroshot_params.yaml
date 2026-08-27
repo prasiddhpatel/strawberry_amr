@@ -1,0 +1,63 @@
+plant_detector_zeroshot_node:
+  ros__parameters:
+    # ---- topics -- matches the locally-decompressed topics used by every
+    # other Orin-side perception node, NOT the raw /compressed streams --
+    # this node does not do its own JPEG/PNG decompression, it consumes
+    # the same already-decompressed stream image_transport's republish
+    # nodes already produce (see docs/ORIN_PI_SPLIT_ARCHITECTURE.md's
+    # "Compressed camera transport" section). Doing decompression twice,
+    # once in image_transport and again inside this node, would be pure
+    # duplicated work for no benefit. ----
+    color_topic: /camera/color/image_raw_decompressed
+    depth_topic: /camera/depth/image_raw_decompressed
+    info_topic: /camera/color/camera_info
+    depth_optical_frame: camera_depth_optical_frame
+
+    # trigger_topic (std_msgs/Empty): publish to this to run ONE detection
+    # pass against the most recent synced frame. This node is event-gated,
+    # not continuous -- see the node's own module docstring for why. There
+    # is no operator-facing "re-prompt" mechanism; the labels below are
+    # fixed configuration, not something typed at runtime.
+    trigger_topic: /zeroshot_detect_trigger
+
+    # ---- models -- mobile_sam_checkpoint is REQUIRED, no sensible
+    # default (see docs/ZERO_SHOT_PERCEPTION_GUIDE.md Part 4) ----
+    grounding_dino_model_id: "IDEA-Research/grounding-dino-tiny"
+    mobile_sam_checkpoint: ""
+
+    # ---- prompts -- fixed at launch, not re-entered interactively.
+    # Grounding DINO's own multi-class syntax handles multiple entries
+    # here correctly; format_grounding_dino_prompt() lowercases and
+    # period-terminates each one automatically. ----
+    plant_labels: ["ripe strawberry", "strawberry plant canopy"]
+    weed_labels: ["weed"]
+
+    # start permissive -- see the guide's Part 5 ("start permissive and
+    # tighten"): too-tight thresholds look identical to "the model is
+    # broken", which sends you debugging the wrong thing
+    box_threshold: 0.35
+    text_threshold: 0.25
+
+    depth_min_m: 0.15            # same physical range as plant_detector_node.py
+    depth_max_m: 3.0
+
+    mask_stride: 2               # back-project every 2nd mask pixel -- same
+                                  # CPU/point-density tradeoff reasoning as the
+                                  # removed YOLO node's identical parameter
+
+    # ---- lightweight geometric plausibility gate -- see
+    # plant_detector_zeroshot_node.py's own module docstring for why this
+    # is a simpler dependency-free check, not the full PCL RANSAC filter
+    # an earlier revision had ----
+    min_cluster_points: 15
+    max_plant_extent_m: 1.0      # reject clusters wider than this -- likely
+                                  # a wall/floor slice, not one plant
+    min_plant_extent_m: 0.01     # reject near-zero-volume clusters -- likely
+                                  # a single spurious depth return
+
+    publish_debug: true
+    force_cuda: true              # fail loudly if CUDA isn't active, rather
+                                  # than silently crawl on CPU. Set false
+                                  # only to isolate a model problem from a
+                                  # runtime problem -- expect CPU inference
+                                  # to be far too slow for real use.

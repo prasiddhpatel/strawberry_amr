@@ -1,0 +1,1432 @@
+<?xml version="1.0" ?>
+<sdf version="1.7">
+  <world name="irish_polytunnel">
+    <include><uri>model://sun</uri></include>
+    <include><uri>model://ground_plane</uri></include>
+
+    <physics type="ode">
+      <max_step_size>0.001</max_step_size>
+      <real_time_factor>1.0</real_time_factor>
+      <real_time_update_rate>1000</real_time_update_rate>
+    </physics>
+
+    <!-- diffuse, indoor-polytunnel-like lighting rather than harsh direct
+         sun; a rough approximation only, see the sim URDF's note on
+         Gazebo Classic's rendering not being photorealistic -->
+    <scene>
+      <ambient>0.6 0.6 0.6 1</ambient>
+      <background>0.7 0.7 0.7 1</background>
+      <shadows>false</shadows>
+    </scene>
+
+
+    <model name="row0_L_post0">
+      <static>true</static>
+      <pose>0.000 0.200 0.550 0 0 0</pose>
+      <link name="link">
+        <collision name="collision">
+          <geometry><cylinder><radius>0.02</radius><length>1.100</length></cylinder></geometry>
+        </collision>
+        <visual name="visual">
+          <geometry><cylinder><radius>0.02</radius><length>1.100</length></cylinder></geometry>
+          <material><ambient>0.5 0.5 0.5 1</ambient><diffuse>0.55 0.55 0.55 1</diffuse></material>
+        </visual>
+      </link>
+    </model>
+
+    <model name="row0_L_post1">
+      <static>true</static>
+      <pose>2.000 0.200 0.550 0 0 0</pose>
+      <link name="link">
+        <collision name="collision">
+          <geometry><cylinder><radius>0.02</radius><length>1.100</length></cylinder></geometry>
+        </collision>
+        <visual name="visual">
+          <geometry><cylinder><radius>0.02</radius><length>1.100</length></cylinder></geometry>
+          <material><ambient>0.5 0.5 0.5 1</ambient><diffuse>0.55 0.55 0.55 1</diffuse></material>
+        </visual>
+      </link>
+    </model>
+
+    <model name="row0_L_post2">
+      <static>true</static>
+      <pose>4.000 0.200 0.550 0 0 0</pose>
+      <link name="link">
+        <collision name="collision">
+          <geometry><cylinder><radius>0.02</radius><length>1.100</length></cylinder></geometry>
+        </collision>
+        <visual name="visual">
+          <geometry><cylinder><radius>0.02</radius><length>1.100</length></cylinder></geometry>
+          <material><ambient>0.5 0.5 0.5 1</ambient><diffuse>0.55 0.55 0.55 1</diffuse></material>
+        </visual>
+      </link>
+    </model>
+
+    <model name="row0_L_post3">
+      <static>true</static>
+      <pose>6.000 0.200 0.550 0 0 0</pose>
+      <link name="link">
+        <collision name="collision">
+          <geometry><cylinder><radius>0.02</radius><length>1.100</length></cylinder></geometry>
+        </collision>
+        <visual name="visual">
+          <geometry><cylinder><radius>0.02</radius><length>1.100</length></cylinder></geometry>
+          <material><ambient>0.5 0.5 0.5 1</ambient><diffuse>0.55 0.55 0.55 1</diffuse></material>
+        </visual>
+      </link>
+    </model>
+
+    <model name="row0_L_trough">
+      <static>true</static>
+      <pose>3.000 0.200 1.100 0 0 0</pose>
+      <link name="link">
+        <collision name="collision">
+          <geometry><box><size>6.000 0.100 0.15</size></box></geometry>
+        </collision>
+        <visual name="visual">
+          <geometry><box><size>6.000 0.100 0.15</size></box></geometry>
+          <material><ambient>0.35 0.25 0.15 1</ambient><diffuse>0.4 0.28 0.18 1</diffuse></material>
+        </visual>
+      </link>
+    </model>
+
+    <model name="row0_L_plant0_foliage">
+      <static>true</static>
+      <pose>0.150 0.200 1.180 0 0 0</pose>
+      <link name="link">
+        <visual name="visual">
+          <geometry><box><size>0.14 0.14 0.10</size></box></geometry>
+          <material><ambient>0.10 0.35 0.10 1</ambient><diffuse>0.15 0.45 0.15 1</diffuse></material>
+        </visual>
+      </link>
+    </model>
+    <model name="row0_L_plant0_berry_0">
+      <static>true</static>
+      <pose>0.120 0.160 1.070 0 0 0</pose>
+      <link name="link">
+        <visual name="visual">
+          <geometry><sphere><radius>0.012</radius></sphere></geometry>
+          <material><ambient>0.75 0.05 0.05 1</ambient><diffuse>0.85 0.08 0.08 1</diffuse></material>
+        </visual>
+      </link>
+    </model>
+    <model name="row0_L_plant0_berry_1">
+      <static>true</static>
+      <pose>0.170 0.230 1.050 0 0 0</pose>
+      <link name="link">
+        <visual name="visual">
+          <geometry><sphere><radius>0.012</radius></sphere></geometry>
+          <material><ambient>0.75 0.05 0.05 1</ambient><diffuse>0.85 0.08 0.08 1</diffuse></material>
+        </visual>
+      </link>
+    </model>
+
+    <model name="row0_L_plant1_foliage">
+      <static>true</static>
+      <pose>0.450 0.200 1.180 0 0 0</pose>
+      <link name="link">
+        <visual name="visual">
+          <geometry><box><size>0.14 0.14 0.10</size></box></geometry>
+          <material><ambient>0.10 0.35 0.10 1</ambient><diffuse>0.15 0.45 0.15 1</diffuse></material>
+        </visual>
+      </link>
+    </model>
+    <model name="row0_L_plant1_berry_0">
+      <static>true</static>
+      <pose>0.420 0.160 1.070 0 0 0</pose>
+      <link name="link">
+        <visual name="visual">
+          <geometry><sphere><radius>0.012</radius></sphere></geometry>
+          <material><ambient>0.75 0.05 0.05 1</ambient><diffuse>0.85 0.08 0.08 1</diffuse></material>
+        </visual>
+      </link>
+    </model>
+    <model name="row0_L_plant1_berry_1">
+      <static>true</static>
+      <pose>0.470 0.230 1.050 0 0 0</pose>
+      <link name="link">
+        <visual name="visual">
+          <geometry><sphere><radius>0.012</radius></sphere></geometry>
+          <material><ambient>0.75 0.05 0.05 1</ambient><diffuse>0.85 0.08 0.08 1</diffuse></material>
+        </visual>
+      </link>
+    </model>
+
+    <model name="row0_L_plant2_foliage">
+      <static>true</static>
+      <pose>0.750 0.200 1.180 0 0 0</pose>
+      <link name="link">
+        <visual name="visual">
+          <geometry><box><size>0.14 0.14 0.10</size></box></geometry>
+          <material><ambient>0.10 0.35 0.10 1</ambient><diffuse>0.15 0.45 0.15 1</diffuse></material>
+        </visual>
+      </link>
+    </model>
+    <model name="row0_L_plant2_berry_0">
+      <static>true</static>
+      <pose>0.720 0.160 1.070 0 0 0</pose>
+      <link name="link">
+        <visual name="visual">
+          <geometry><sphere><radius>0.012</radius></sphere></geometry>
+          <material><ambient>0.75 0.05 0.05 1</ambient><diffuse>0.85 0.08 0.08 1</diffuse></material>
+        </visual>
+      </link>
+    </model>
+    <model name="row0_L_plant2_berry_1">
+      <static>true</static>
+      <pose>0.770 0.230 1.050 0 0 0</pose>
+      <link name="link">
+        <visual name="visual">
+          <geometry><sphere><radius>0.012</radius></sphere></geometry>
+          <material><ambient>0.75 0.05 0.05 1</ambient><diffuse>0.85 0.08 0.08 1</diffuse></material>
+        </visual>
+      </link>
+    </model>
+
+    <model name="row0_L_plant3_foliage">
+      <static>true</static>
+      <pose>1.050 0.200 1.180 0 0 0</pose>
+      <link name="link">
+        <visual name="visual">
+          <geometry><box><size>0.14 0.14 0.10</size></box></geometry>
+          <material><ambient>0.10 0.35 0.10 1</ambient><diffuse>0.15 0.45 0.15 1</diffuse></material>
+        </visual>
+      </link>
+    </model>
+    <model name="row0_L_plant3_berry_0">
+      <static>true</static>
+      <pose>1.020 0.160 1.070 0 0 0</pose>
+      <link name="link">
+        <visual name="visual">
+          <geometry><sphere><radius>0.012</radius></sphere></geometry>
+          <material><ambient>0.75 0.05 0.05 1</ambient><diffuse>0.85 0.08 0.08 1</diffuse></material>
+        </visual>
+      </link>
+    </model>
+    <model name="row0_L_plant3_berry_1">
+      <static>true</static>
+      <pose>1.070 0.230 1.050 0 0 0</pose>
+      <link name="link">
+        <visual name="visual">
+          <geometry><sphere><radius>0.012</radius></sphere></geometry>
+          <material><ambient>0.75 0.05 0.05 1</ambient><diffuse>0.85 0.08 0.08 1</diffuse></material>
+        </visual>
+      </link>
+    </model>
+
+    <model name="row0_L_plant4_foliage">
+      <static>true</static>
+      <pose>1.350 0.200 1.180 0 0 0</pose>
+      <link name="link">
+        <visual name="visual">
+          <geometry><box><size>0.14 0.14 0.10</size></box></geometry>
+          <material><ambient>0.10 0.35 0.10 1</ambient><diffuse>0.15 0.45 0.15 1</diffuse></material>
+        </visual>
+      </link>
+    </model>
+    <model name="row0_L_plant4_berry_0">
+      <static>true</static>
+      <pose>1.320 0.160 1.070 0 0 0</pose>
+      <link name="link">
+        <visual name="visual">
+          <geometry><sphere><radius>0.012</radius></sphere></geometry>
+          <material><ambient>0.75 0.05 0.05 1</ambient><diffuse>0.85 0.08 0.08 1</diffuse></material>
+        </visual>
+      </link>
+    </model>
+    <model name="row0_L_plant4_berry_1">
+      <static>true</static>
+      <pose>1.370 0.230 1.050 0 0 0</pose>
+      <link name="link">
+        <visual name="visual">
+          <geometry><sphere><radius>0.012</radius></sphere></geometry>
+          <material><ambient>0.75 0.05 0.05 1</ambient><diffuse>0.85 0.08 0.08 1</diffuse></material>
+        </visual>
+      </link>
+    </model>
+
+    <model name="row0_L_plant5_foliage">
+      <static>true</static>
+      <pose>1.650 0.200 1.180 0 0 0</pose>
+      <link name="link">
+        <visual name="visual">
+          <geometry><box><size>0.14 0.14 0.10</size></box></geometry>
+          <material><ambient>0.10 0.35 0.10 1</ambient><diffuse>0.15 0.45 0.15 1</diffuse></material>
+        </visual>
+      </link>
+    </model>
+    <model name="row0_L_plant5_berry_0">
+      <static>true</static>
+      <pose>1.620 0.160 1.070 0 0 0</pose>
+      <link name="link">
+        <visual name="visual">
+          <geometry><sphere><radius>0.012</radius></sphere></geometry>
+          <material><ambient>0.75 0.05 0.05 1</ambient><diffuse>0.85 0.08 0.08 1</diffuse></material>
+        </visual>
+      </link>
+    </model>
+    <model name="row0_L_plant5_berry_1">
+      <static>true</static>
+      <pose>1.670 0.230 1.050 0 0 0</pose>
+      <link name="link">
+        <visual name="visual">
+          <geometry><sphere><radius>0.012</radius></sphere></geometry>
+          <material><ambient>0.75 0.05 0.05 1</ambient><diffuse>0.85 0.08 0.08 1</diffuse></material>
+        </visual>
+      </link>
+    </model>
+
+    <model name="row0_L_plant6_foliage">
+      <static>true</static>
+      <pose>1.950 0.200 1.180 0 0 0</pose>
+      <link name="link">
+        <visual name="visual">
+          <geometry><box><size>0.14 0.14 0.10</size></box></geometry>
+          <material><ambient>0.10 0.35 0.10 1</ambient><diffuse>0.15 0.45 0.15 1</diffuse></material>
+        </visual>
+      </link>
+    </model>
+    <model name="row0_L_plant6_berry_0">
+      <static>true</static>
+      <pose>1.920 0.160 1.070 0 0 0</pose>
+      <link name="link">
+        <visual name="visual">
+          <geometry><sphere><radius>0.012</radius></sphere></geometry>
+          <material><ambient>0.75 0.05 0.05 1</ambient><diffuse>0.85 0.08 0.08 1</diffuse></material>
+        </visual>
+      </link>
+    </model>
+    <model name="row0_L_plant6_berry_1">
+      <static>true</static>
+      <pose>1.970 0.230 1.050 0 0 0</pose>
+      <link name="link">
+        <visual name="visual">
+          <geometry><sphere><radius>0.012</radius></sphere></geometry>
+          <material><ambient>0.75 0.05 0.05 1</ambient><diffuse>0.85 0.08 0.08 1</diffuse></material>
+        </visual>
+      </link>
+    </model>
+
+    <model name="row0_L_plant7_foliage">
+      <static>true</static>
+      <pose>2.250 0.200 1.180 0 0 0</pose>
+      <link name="link">
+        <visual name="visual">
+          <geometry><box><size>0.14 0.14 0.10</size></box></geometry>
+          <material><ambient>0.10 0.35 0.10 1</ambient><diffuse>0.15 0.45 0.15 1</diffuse></material>
+        </visual>
+      </link>
+    </model>
+    <model name="row0_L_plant7_berry_0">
+      <static>true</static>
+      <pose>2.220 0.160 1.070 0 0 0</pose>
+      <link name="link">
+        <visual name="visual">
+          <geometry><sphere><radius>0.012</radius></sphere></geometry>
+          <material><ambient>0.75 0.05 0.05 1</ambient><diffuse>0.85 0.08 0.08 1</diffuse></material>
+        </visual>
+      </link>
+    </model>
+    <model name="row0_L_plant7_berry_1">
+      <static>true</static>
+      <pose>2.270 0.230 1.050 0 0 0</pose>
+      <link name="link">
+        <visual name="visual">
+          <geometry><sphere><radius>0.012</radius></sphere></geometry>
+          <material><ambient>0.75 0.05 0.05 1</ambient><diffuse>0.85 0.08 0.08 1</diffuse></material>
+        </visual>
+      </link>
+    </model>
+
+    <model name="row0_L_plant8_foliage">
+      <static>true</static>
+      <pose>2.550 0.200 1.180 0 0 0</pose>
+      <link name="link">
+        <visual name="visual">
+          <geometry><box><size>0.14 0.14 0.10</size></box></geometry>
+          <material><ambient>0.10 0.35 0.10 1</ambient><diffuse>0.15 0.45 0.15 1</diffuse></material>
+        </visual>
+      </link>
+    </model>
+    <model name="row0_L_plant8_berry_0">
+      <static>true</static>
+      <pose>2.520 0.160 1.070 0 0 0</pose>
+      <link name="link">
+        <visual name="visual">
+          <geometry><sphere><radius>0.012</radius></sphere></geometry>
+          <material><ambient>0.75 0.05 0.05 1</ambient><diffuse>0.85 0.08 0.08 1</diffuse></material>
+        </visual>
+      </link>
+    </model>
+    <model name="row0_L_plant8_berry_1">
+      <static>true</static>
+      <pose>2.570 0.230 1.050 0 0 0</pose>
+      <link name="link">
+        <visual name="visual">
+          <geometry><sphere><radius>0.012</radius></sphere></geometry>
+          <material><ambient>0.75 0.05 0.05 1</ambient><diffuse>0.85 0.08 0.08 1</diffuse></material>
+        </visual>
+      </link>
+    </model>
+
+    <model name="row0_L_plant9_foliage">
+      <static>true</static>
+      <pose>2.850 0.200 1.180 0 0 0</pose>
+      <link name="link">
+        <visual name="visual">
+          <geometry><box><size>0.14 0.14 0.10</size></box></geometry>
+          <material><ambient>0.10 0.35 0.10 1</ambient><diffuse>0.15 0.45 0.15 1</diffuse></material>
+        </visual>
+      </link>
+    </model>
+    <model name="row0_L_plant9_berry_0">
+      <static>true</static>
+      <pose>2.820 0.160 1.070 0 0 0</pose>
+      <link name="link">
+        <visual name="visual">
+          <geometry><sphere><radius>0.012</radius></sphere></geometry>
+          <material><ambient>0.75 0.05 0.05 1</ambient><diffuse>0.85 0.08 0.08 1</diffuse></material>
+        </visual>
+      </link>
+    </model>
+    <model name="row0_L_plant9_berry_1">
+      <static>true</static>
+      <pose>2.870 0.230 1.050 0 0 0</pose>
+      <link name="link">
+        <visual name="visual">
+          <geometry><sphere><radius>0.012</radius></sphere></geometry>
+          <material><ambient>0.75 0.05 0.05 1</ambient><diffuse>0.85 0.08 0.08 1</diffuse></material>
+        </visual>
+      </link>
+    </model>
+
+    <model name="row0_L_plant10_foliage">
+      <static>true</static>
+      <pose>3.150 0.200 1.180 0 0 0</pose>
+      <link name="link">
+        <visual name="visual">
+          <geometry><box><size>0.14 0.14 0.10</size></box></geometry>
+          <material><ambient>0.10 0.35 0.10 1</ambient><diffuse>0.15 0.45 0.15 1</diffuse></material>
+        </visual>
+      </link>
+    </model>
+    <model name="row0_L_plant10_berry_0">
+      <static>true</static>
+      <pose>3.120 0.160 1.070 0 0 0</pose>
+      <link name="link">
+        <visual name="visual">
+          <geometry><sphere><radius>0.012</radius></sphere></geometry>
+          <material><ambient>0.75 0.05 0.05 1</ambient><diffuse>0.85 0.08 0.08 1</diffuse></material>
+        </visual>
+      </link>
+    </model>
+    <model name="row0_L_plant10_berry_1">
+      <static>true</static>
+      <pose>3.170 0.230 1.050 0 0 0</pose>
+      <link name="link">
+        <visual name="visual">
+          <geometry><sphere><radius>0.012</radius></sphere></geometry>
+          <material><ambient>0.75 0.05 0.05 1</ambient><diffuse>0.85 0.08 0.08 1</diffuse></material>
+        </visual>
+      </link>
+    </model>
+
+    <model name="row0_L_plant11_foliage">
+      <static>true</static>
+      <pose>3.450 0.200 1.180 0 0 0</pose>
+      <link name="link">
+        <visual name="visual">
+          <geometry><box><size>0.14 0.14 0.10</size></box></geometry>
+          <material><ambient>0.10 0.35 0.10 1</ambient><diffuse>0.15 0.45 0.15 1</diffuse></material>
+        </visual>
+      </link>
+    </model>
+    <model name="row0_L_plant11_berry_0">
+      <static>true</static>
+      <pose>3.420 0.160 1.070 0 0 0</pose>
+      <link name="link">
+        <visual name="visual">
+          <geometry><sphere><radius>0.012</radius></sphere></geometry>
+          <material><ambient>0.75 0.05 0.05 1</ambient><diffuse>0.85 0.08 0.08 1</diffuse></material>
+        </visual>
+      </link>
+    </model>
+    <model name="row0_L_plant11_berry_1">
+      <static>true</static>
+      <pose>3.470 0.230 1.050 0 0 0</pose>
+      <link name="link">
+        <visual name="visual">
+          <geometry><sphere><radius>0.012</radius></sphere></geometry>
+          <material><ambient>0.75 0.05 0.05 1</ambient><diffuse>0.85 0.08 0.08 1</diffuse></material>
+        </visual>
+      </link>
+    </model>
+
+    <model name="row0_L_plant12_foliage">
+      <static>true</static>
+      <pose>3.750 0.200 1.180 0 0 0</pose>
+      <link name="link">
+        <visual name="visual">
+          <geometry><box><size>0.14 0.14 0.10</size></box></geometry>
+          <material><ambient>0.10 0.35 0.10 1</ambient><diffuse>0.15 0.45 0.15 1</diffuse></material>
+        </visual>
+      </link>
+    </model>
+    <model name="row0_L_plant12_berry_0">
+      <static>true</static>
+      <pose>3.720 0.160 1.070 0 0 0</pose>
+      <link name="link">
+        <visual name="visual">
+          <geometry><sphere><radius>0.012</radius></sphere></geometry>
+          <material><ambient>0.75 0.05 0.05 1</ambient><diffuse>0.85 0.08 0.08 1</diffuse></material>
+        </visual>
+      </link>
+    </model>
+    <model name="row0_L_plant12_berry_1">
+      <static>true</static>
+      <pose>3.770 0.230 1.050 0 0 0</pose>
+      <link name="link">
+        <visual name="visual">
+          <geometry><sphere><radius>0.012</radius></sphere></geometry>
+          <material><ambient>0.75 0.05 0.05 1</ambient><diffuse>0.85 0.08 0.08 1</diffuse></material>
+        </visual>
+      </link>
+    </model>
+
+    <model name="row0_L_plant13_foliage">
+      <static>true</static>
+      <pose>4.050 0.200 1.180 0 0 0</pose>
+      <link name="link">
+        <visual name="visual">
+          <geometry><box><size>0.14 0.14 0.10</size></box></geometry>
+          <material><ambient>0.10 0.35 0.10 1</ambient><diffuse>0.15 0.45 0.15 1</diffuse></material>
+        </visual>
+      </link>
+    </model>
+    <model name="row0_L_plant13_berry_0">
+      <static>true</static>
+      <pose>4.020 0.160 1.070 0 0 0</pose>
+      <link name="link">
+        <visual name="visual">
+          <geometry><sphere><radius>0.012</radius></sphere></geometry>
+          <material><ambient>0.75 0.05 0.05 1</ambient><diffuse>0.85 0.08 0.08 1</diffuse></material>
+        </visual>
+      </link>
+    </model>
+    <model name="row0_L_plant13_berry_1">
+      <static>true</static>
+      <pose>4.070 0.230 1.050 0 0 0</pose>
+      <link name="link">
+        <visual name="visual">
+          <geometry><sphere><radius>0.012</radius></sphere></geometry>
+          <material><ambient>0.75 0.05 0.05 1</ambient><diffuse>0.85 0.08 0.08 1</diffuse></material>
+        </visual>
+      </link>
+    </model>
+
+    <model name="row0_L_plant14_foliage">
+      <static>true</static>
+      <pose>4.350 0.200 1.180 0 0 0</pose>
+      <link name="link">
+        <visual name="visual">
+          <geometry><box><size>0.14 0.14 0.10</size></box></geometry>
+          <material><ambient>0.10 0.35 0.10 1</ambient><diffuse>0.15 0.45 0.15 1</diffuse></material>
+        </visual>
+      </link>
+    </model>
+    <model name="row0_L_plant14_berry_0">
+      <static>true</static>
+      <pose>4.320 0.160 1.070 0 0 0</pose>
+      <link name="link">
+        <visual name="visual">
+          <geometry><sphere><radius>0.012</radius></sphere></geometry>
+          <material><ambient>0.75 0.05 0.05 1</ambient><diffuse>0.85 0.08 0.08 1</diffuse></material>
+        </visual>
+      </link>
+    </model>
+    <model name="row0_L_plant14_berry_1">
+      <static>true</static>
+      <pose>4.370 0.230 1.050 0 0 0</pose>
+      <link name="link">
+        <visual name="visual">
+          <geometry><sphere><radius>0.012</radius></sphere></geometry>
+          <material><ambient>0.75 0.05 0.05 1</ambient><diffuse>0.85 0.08 0.08 1</diffuse></material>
+        </visual>
+      </link>
+    </model>
+
+    <model name="row0_L_plant15_foliage">
+      <static>true</static>
+      <pose>4.650 0.200 1.180 0 0 0</pose>
+      <link name="link">
+        <visual name="visual">
+          <geometry><box><size>0.14 0.14 0.10</size></box></geometry>
+          <material><ambient>0.10 0.35 0.10 1</ambient><diffuse>0.15 0.45 0.15 1</diffuse></material>
+        </visual>
+      </link>
+    </model>
+    <model name="row0_L_plant15_berry_0">
+      <static>true</static>
+      <pose>4.620 0.160 1.070 0 0 0</pose>
+      <link name="link">
+        <visual name="visual">
+          <geometry><sphere><radius>0.012</radius></sphere></geometry>
+          <material><ambient>0.75 0.05 0.05 1</ambient><diffuse>0.85 0.08 0.08 1</diffuse></material>
+        </visual>
+      </link>
+    </model>
+    <model name="row0_L_plant15_berry_1">
+      <static>true</static>
+      <pose>4.670 0.230 1.050 0 0 0</pose>
+      <link name="link">
+        <visual name="visual">
+          <geometry><sphere><radius>0.012</radius></sphere></geometry>
+          <material><ambient>0.75 0.05 0.05 1</ambient><diffuse>0.85 0.08 0.08 1</diffuse></material>
+        </visual>
+      </link>
+    </model>
+
+    <model name="row0_L_plant16_foliage">
+      <static>true</static>
+      <pose>4.950 0.200 1.180 0 0 0</pose>
+      <link name="link">
+        <visual name="visual">
+          <geometry><box><size>0.14 0.14 0.10</size></box></geometry>
+          <material><ambient>0.10 0.35 0.10 1</ambient><diffuse>0.15 0.45 0.15 1</diffuse></material>
+        </visual>
+      </link>
+    </model>
+    <model name="row0_L_plant16_berry_0">
+      <static>true</static>
+      <pose>4.920 0.160 1.070 0 0 0</pose>
+      <link name="link">
+        <visual name="visual">
+          <geometry><sphere><radius>0.012</radius></sphere></geometry>
+          <material><ambient>0.75 0.05 0.05 1</ambient><diffuse>0.85 0.08 0.08 1</diffuse></material>
+        </visual>
+      </link>
+    </model>
+    <model name="row0_L_plant16_berry_1">
+      <static>true</static>
+      <pose>4.970 0.230 1.050 0 0 0</pose>
+      <link name="link">
+        <visual name="visual">
+          <geometry><sphere><radius>0.012</radius></sphere></geometry>
+          <material><ambient>0.75 0.05 0.05 1</ambient><diffuse>0.85 0.08 0.08 1</diffuse></material>
+        </visual>
+      </link>
+    </model>
+
+    <model name="row0_L_plant17_foliage">
+      <static>true</static>
+      <pose>5.250 0.200 1.180 0 0 0</pose>
+      <link name="link">
+        <visual name="visual">
+          <geometry><box><size>0.14 0.14 0.10</size></box></geometry>
+          <material><ambient>0.10 0.35 0.10 1</ambient><diffuse>0.15 0.45 0.15 1</diffuse></material>
+        </visual>
+      </link>
+    </model>
+    <model name="row0_L_plant17_berry_0">
+      <static>true</static>
+      <pose>5.220 0.160 1.070 0 0 0</pose>
+      <link name="link">
+        <visual name="visual">
+          <geometry><sphere><radius>0.012</radius></sphere></geometry>
+          <material><ambient>0.75 0.05 0.05 1</ambient><diffuse>0.85 0.08 0.08 1</diffuse></material>
+        </visual>
+      </link>
+    </model>
+    <model name="row0_L_plant17_berry_1">
+      <static>true</static>
+      <pose>5.270 0.230 1.050 0 0 0</pose>
+      <link name="link">
+        <visual name="visual">
+          <geometry><sphere><radius>0.012</radius></sphere></geometry>
+          <material><ambient>0.75 0.05 0.05 1</ambient><diffuse>0.85 0.08 0.08 1</diffuse></material>
+        </visual>
+      </link>
+    </model>
+
+    <model name="row0_L_plant18_foliage">
+      <static>true</static>
+      <pose>5.550 0.200 1.180 0 0 0</pose>
+      <link name="link">
+        <visual name="visual">
+          <geometry><box><size>0.14 0.14 0.10</size></box></geometry>
+          <material><ambient>0.10 0.35 0.10 1</ambient><diffuse>0.15 0.45 0.15 1</diffuse></material>
+        </visual>
+      </link>
+    </model>
+    <model name="row0_L_plant18_berry_0">
+      <static>true</static>
+      <pose>5.520 0.160 1.070 0 0 0</pose>
+      <link name="link">
+        <visual name="visual">
+          <geometry><sphere><radius>0.012</radius></sphere></geometry>
+          <material><ambient>0.75 0.05 0.05 1</ambient><diffuse>0.85 0.08 0.08 1</diffuse></material>
+        </visual>
+      </link>
+    </model>
+    <model name="row0_L_plant18_berry_1">
+      <static>true</static>
+      <pose>5.570 0.230 1.050 0 0 0</pose>
+      <link name="link">
+        <visual name="visual">
+          <geometry><sphere><radius>0.012</radius></sphere></geometry>
+          <material><ambient>0.75 0.05 0.05 1</ambient><diffuse>0.85 0.08 0.08 1</diffuse></material>
+        </visual>
+      </link>
+    </model>
+
+    <model name="row0_L_plant19_foliage">
+      <static>true</static>
+      <pose>5.850 0.200 1.180 0 0 0</pose>
+      <link name="link">
+        <visual name="visual">
+          <geometry><box><size>0.14 0.14 0.10</size></box></geometry>
+          <material><ambient>0.10 0.35 0.10 1</ambient><diffuse>0.15 0.45 0.15 1</diffuse></material>
+        </visual>
+      </link>
+    </model>
+    <model name="row0_L_plant19_berry_0">
+      <static>true</static>
+      <pose>5.820 0.160 1.070 0 0 0</pose>
+      <link name="link">
+        <visual name="visual">
+          <geometry><sphere><radius>0.012</radius></sphere></geometry>
+          <material><ambient>0.75 0.05 0.05 1</ambient><diffuse>0.85 0.08 0.08 1</diffuse></material>
+        </visual>
+      </link>
+    </model>
+    <model name="row0_L_plant19_berry_1">
+      <static>true</static>
+      <pose>5.870 0.230 1.050 0 0 0</pose>
+      <link name="link">
+        <visual name="visual">
+          <geometry><sphere><radius>0.012</radius></sphere></geometry>
+          <material><ambient>0.75 0.05 0.05 1</ambient><diffuse>0.85 0.08 0.08 1</diffuse></material>
+        </visual>
+      </link>
+    </model>
+
+    <model name="row0_R_post0">
+      <static>true</static>
+      <pose>0.000 -0.200 0.550 0 0 0</pose>
+      <link name="link">
+        <collision name="collision">
+          <geometry><cylinder><radius>0.02</radius><length>1.100</length></cylinder></geometry>
+        </collision>
+        <visual name="visual">
+          <geometry><cylinder><radius>0.02</radius><length>1.100</length></cylinder></geometry>
+          <material><ambient>0.5 0.5 0.5 1</ambient><diffuse>0.55 0.55 0.55 1</diffuse></material>
+        </visual>
+      </link>
+    </model>
+
+    <model name="row0_R_post1">
+      <static>true</static>
+      <pose>2.000 -0.200 0.550 0 0 0</pose>
+      <link name="link">
+        <collision name="collision">
+          <geometry><cylinder><radius>0.02</radius><length>1.100</length></cylinder></geometry>
+        </collision>
+        <visual name="visual">
+          <geometry><cylinder><radius>0.02</radius><length>1.100</length></cylinder></geometry>
+          <material><ambient>0.5 0.5 0.5 1</ambient><diffuse>0.55 0.55 0.55 1</diffuse></material>
+        </visual>
+      </link>
+    </model>
+
+    <model name="row0_R_post2">
+      <static>true</static>
+      <pose>4.000 -0.200 0.550 0 0 0</pose>
+      <link name="link">
+        <collision name="collision">
+          <geometry><cylinder><radius>0.02</radius><length>1.100</length></cylinder></geometry>
+        </collision>
+        <visual name="visual">
+          <geometry><cylinder><radius>0.02</radius><length>1.100</length></cylinder></geometry>
+          <material><ambient>0.5 0.5 0.5 1</ambient><diffuse>0.55 0.55 0.55 1</diffuse></material>
+        </visual>
+      </link>
+    </model>
+
+    <model name="row0_R_post3">
+      <static>true</static>
+      <pose>6.000 -0.200 0.550 0 0 0</pose>
+      <link name="link">
+        <collision name="collision">
+          <geometry><cylinder><radius>0.02</radius><length>1.100</length></cylinder></geometry>
+        </collision>
+        <visual name="visual">
+          <geometry><cylinder><radius>0.02</radius><length>1.100</length></cylinder></geometry>
+          <material><ambient>0.5 0.5 0.5 1</ambient><diffuse>0.55 0.55 0.55 1</diffuse></material>
+        </visual>
+      </link>
+    </model>
+
+    <model name="row0_R_trough">
+      <static>true</static>
+      <pose>3.000 -0.200 1.100 0 0 0</pose>
+      <link name="link">
+        <collision name="collision">
+          <geometry><box><size>6.000 0.100 0.15</size></box></geometry>
+        </collision>
+        <visual name="visual">
+          <geometry><box><size>6.000 0.100 0.15</size></box></geometry>
+          <material><ambient>0.35 0.25 0.15 1</ambient><diffuse>0.4 0.28 0.18 1</diffuse></material>
+        </visual>
+      </link>
+    </model>
+
+    <model name="row0_R_plant0_foliage">
+      <static>true</static>
+      <pose>0.150 -0.200 1.180 0 0 0</pose>
+      <link name="link">
+        <visual name="visual">
+          <geometry><box><size>0.14 0.14 0.10</size></box></geometry>
+          <material><ambient>0.10 0.35 0.10 1</ambient><diffuse>0.15 0.45 0.15 1</diffuse></material>
+        </visual>
+      </link>
+    </model>
+    <model name="row0_R_plant0_berry_0">
+      <static>true</static>
+      <pose>0.120 -0.240 1.070 0 0 0</pose>
+      <link name="link">
+        <visual name="visual">
+          <geometry><sphere><radius>0.012</radius></sphere></geometry>
+          <material><ambient>0.75 0.05 0.05 1</ambient><diffuse>0.85 0.08 0.08 1</diffuse></material>
+        </visual>
+      </link>
+    </model>
+    <model name="row0_R_plant0_berry_1">
+      <static>true</static>
+      <pose>0.170 -0.170 1.050 0 0 0</pose>
+      <link name="link">
+        <visual name="visual">
+          <geometry><sphere><radius>0.012</radius></sphere></geometry>
+          <material><ambient>0.75 0.05 0.05 1</ambient><diffuse>0.85 0.08 0.08 1</diffuse></material>
+        </visual>
+      </link>
+    </model>
+
+    <model name="row0_R_plant1_foliage">
+      <static>true</static>
+      <pose>0.450 -0.200 1.180 0 0 0</pose>
+      <link name="link">
+        <visual name="visual">
+          <geometry><box><size>0.14 0.14 0.10</size></box></geometry>
+          <material><ambient>0.10 0.35 0.10 1</ambient><diffuse>0.15 0.45 0.15 1</diffuse></material>
+        </visual>
+      </link>
+    </model>
+    <model name="row0_R_plant1_berry_0">
+      <static>true</static>
+      <pose>0.420 -0.240 1.070 0 0 0</pose>
+      <link name="link">
+        <visual name="visual">
+          <geometry><sphere><radius>0.012</radius></sphere></geometry>
+          <material><ambient>0.75 0.05 0.05 1</ambient><diffuse>0.85 0.08 0.08 1</diffuse></material>
+        </visual>
+      </link>
+    </model>
+    <model name="row0_R_plant1_berry_1">
+      <static>true</static>
+      <pose>0.470 -0.170 1.050 0 0 0</pose>
+      <link name="link">
+        <visual name="visual">
+          <geometry><sphere><radius>0.012</radius></sphere></geometry>
+          <material><ambient>0.75 0.05 0.05 1</ambient><diffuse>0.85 0.08 0.08 1</diffuse></material>
+        </visual>
+      </link>
+    </model>
+
+    <model name="row0_R_plant2_foliage">
+      <static>true</static>
+      <pose>0.750 -0.200 1.180 0 0 0</pose>
+      <link name="link">
+        <visual name="visual">
+          <geometry><box><size>0.14 0.14 0.10</size></box></geometry>
+          <material><ambient>0.10 0.35 0.10 1</ambient><diffuse>0.15 0.45 0.15 1</diffuse></material>
+        </visual>
+      </link>
+    </model>
+    <model name="row0_R_plant2_berry_0">
+      <static>true</static>
+      <pose>0.720 -0.240 1.070 0 0 0</pose>
+      <link name="link">
+        <visual name="visual">
+          <geometry><sphere><radius>0.012</radius></sphere></geometry>
+          <material><ambient>0.75 0.05 0.05 1</ambient><diffuse>0.85 0.08 0.08 1</diffuse></material>
+        </visual>
+      </link>
+    </model>
+    <model name="row0_R_plant2_berry_1">
+      <static>true</static>
+      <pose>0.770 -0.170 1.050 0 0 0</pose>
+      <link name="link">
+        <visual name="visual">
+          <geometry><sphere><radius>0.012</radius></sphere></geometry>
+          <material><ambient>0.75 0.05 0.05 1</ambient><diffuse>0.85 0.08 0.08 1</diffuse></material>
+        </visual>
+      </link>
+    </model>
+
+    <model name="row0_R_plant3_foliage">
+      <static>true</static>
+      <pose>1.050 -0.200 1.180 0 0 0</pose>
+      <link name="link">
+        <visual name="visual">
+          <geometry><box><size>0.14 0.14 0.10</size></box></geometry>
+          <material><ambient>0.10 0.35 0.10 1</ambient><diffuse>0.15 0.45 0.15 1</diffuse></material>
+        </visual>
+      </link>
+    </model>
+    <model name="row0_R_plant3_berry_0">
+      <static>true</static>
+      <pose>1.020 -0.240 1.070 0 0 0</pose>
+      <link name="link">
+        <visual name="visual">
+          <geometry><sphere><radius>0.012</radius></sphere></geometry>
+          <material><ambient>0.75 0.05 0.05 1</ambient><diffuse>0.85 0.08 0.08 1</diffuse></material>
+        </visual>
+      </link>
+    </model>
+    <model name="row0_R_plant3_berry_1">
+      <static>true</static>
+      <pose>1.070 -0.170 1.050 0 0 0</pose>
+      <link name="link">
+        <visual name="visual">
+          <geometry><sphere><radius>0.012</radius></sphere></geometry>
+          <material><ambient>0.75 0.05 0.05 1</ambient><diffuse>0.85 0.08 0.08 1</diffuse></material>
+        </visual>
+      </link>
+    </model>
+
+    <model name="row0_R_plant4_foliage">
+      <static>true</static>
+      <pose>1.350 -0.200 1.180 0 0 0</pose>
+      <link name="link">
+        <visual name="visual">
+          <geometry><box><size>0.14 0.14 0.10</size></box></geometry>
+          <material><ambient>0.10 0.35 0.10 1</ambient><diffuse>0.15 0.45 0.15 1</diffuse></material>
+        </visual>
+      </link>
+    </model>
+    <model name="row0_R_plant4_berry_0">
+      <static>true</static>
+      <pose>1.320 -0.240 1.070 0 0 0</pose>
+      <link name="link">
+        <visual name="visual">
+          <geometry><sphere><radius>0.012</radius></sphere></geometry>
+          <material><ambient>0.75 0.05 0.05 1</ambient><diffuse>0.85 0.08 0.08 1</diffuse></material>
+        </visual>
+      </link>
+    </model>
+    <model name="row0_R_plant4_berry_1">
+      <static>true</static>
+      <pose>1.370 -0.170 1.050 0 0 0</pose>
+      <link name="link">
+        <visual name="visual">
+          <geometry><sphere><radius>0.012</radius></sphere></geometry>
+          <material><ambient>0.75 0.05 0.05 1</ambient><diffuse>0.85 0.08 0.08 1</diffuse></material>
+        </visual>
+      </link>
+    </model>
+
+    <model name="row0_R_plant5_foliage">
+      <static>true</static>
+      <pose>1.650 -0.200 1.180 0 0 0</pose>
+      <link name="link">
+        <visual name="visual">
+          <geometry><box><size>0.14 0.14 0.10</size></box></geometry>
+          <material><ambient>0.10 0.35 0.10 1</ambient><diffuse>0.15 0.45 0.15 1</diffuse></material>
+        </visual>
+      </link>
+    </model>
+    <model name="row0_R_plant5_berry_0">
+      <static>true</static>
+      <pose>1.620 -0.240 1.070 0 0 0</pose>
+      <link name="link">
+        <visual name="visual">
+          <geometry><sphere><radius>0.012</radius></sphere></geometry>
+          <material><ambient>0.75 0.05 0.05 1</ambient><diffuse>0.85 0.08 0.08 1</diffuse></material>
+        </visual>
+      </link>
+    </model>
+    <model name="row0_R_plant5_berry_1">
+      <static>true</static>
+      <pose>1.670 -0.170 1.050 0 0 0</pose>
+      <link name="link">
+        <visual name="visual">
+          <geometry><sphere><radius>0.012</radius></sphere></geometry>
+          <material><ambient>0.75 0.05 0.05 1</ambient><diffuse>0.85 0.08 0.08 1</diffuse></material>
+        </visual>
+      </link>
+    </model>
+
+    <model name="row0_R_plant6_foliage">
+      <static>true</static>
+      <pose>1.950 -0.200 1.180 0 0 0</pose>
+      <link name="link">
+        <visual name="visual">
+          <geometry><box><size>0.14 0.14 0.10</size></box></geometry>
+          <material><ambient>0.10 0.35 0.10 1</ambient><diffuse>0.15 0.45 0.15 1</diffuse></material>
+        </visual>
+      </link>
+    </model>
+    <model name="row0_R_plant6_berry_0">
+      <static>true</static>
+      <pose>1.920 -0.240 1.070 0 0 0</pose>
+      <link name="link">
+        <visual name="visual">
+          <geometry><sphere><radius>0.012</radius></sphere></geometry>
+          <material><ambient>0.75 0.05 0.05 1</ambient><diffuse>0.85 0.08 0.08 1</diffuse></material>
+        </visual>
+      </link>
+    </model>
+    <model name="row0_R_plant6_berry_1">
+      <static>true</static>
+      <pose>1.970 -0.170 1.050 0 0 0</pose>
+      <link name="link">
+        <visual name="visual">
+          <geometry><sphere><radius>0.012</radius></sphere></geometry>
+          <material><ambient>0.75 0.05 0.05 1</ambient><diffuse>0.85 0.08 0.08 1</diffuse></material>
+        </visual>
+      </link>
+    </model>
+
+    <model name="row0_R_plant7_foliage">
+      <static>true</static>
+      <pose>2.250 -0.200 1.180 0 0 0</pose>
+      <link name="link">
+        <visual name="visual">
+          <geometry><box><size>0.14 0.14 0.10</size></box></geometry>
+          <material><ambient>0.10 0.35 0.10 1</ambient><diffuse>0.15 0.45 0.15 1</diffuse></material>
+        </visual>
+      </link>
+    </model>
+    <model name="row0_R_plant7_berry_0">
+      <static>true</static>
+      <pose>2.220 -0.240 1.070 0 0 0</pose>
+      <link name="link">
+        <visual name="visual">
+          <geometry><sphere><radius>0.012</radius></sphere></geometry>
+          <material><ambient>0.75 0.05 0.05 1</ambient><diffuse>0.85 0.08 0.08 1</diffuse></material>
+        </visual>
+      </link>
+    </model>
+    <model name="row0_R_plant7_berry_1">
+      <static>true</static>
+      <pose>2.270 -0.170 1.050 0 0 0</pose>
+      <link name="link">
+        <visual name="visual">
+          <geometry><sphere><radius>0.012</radius></sphere></geometry>
+          <material><ambient>0.75 0.05 0.05 1</ambient><diffuse>0.85 0.08 0.08 1</diffuse></material>
+        </visual>
+      </link>
+    </model>
+
+    <model name="row0_R_plant8_foliage">
+      <static>true</static>
+      <pose>2.550 -0.200 1.180 0 0 0</pose>
+      <link name="link">
+        <visual name="visual">
+          <geometry><box><size>0.14 0.14 0.10</size></box></geometry>
+          <material><ambient>0.10 0.35 0.10 1</ambient><diffuse>0.15 0.45 0.15 1</diffuse></material>
+        </visual>
+      </link>
+    </model>
+    <model name="row0_R_plant8_berry_0">
+      <static>true</static>
+      <pose>2.520 -0.240 1.070 0 0 0</pose>
+      <link name="link">
+        <visual name="visual">
+          <geometry><sphere><radius>0.012</radius></sphere></geometry>
+          <material><ambient>0.75 0.05 0.05 1</ambient><diffuse>0.85 0.08 0.08 1</diffuse></material>
+        </visual>
+      </link>
+    </model>
+    <model name="row0_R_plant8_berry_1">
+      <static>true</static>
+      <pose>2.570 -0.170 1.050 0 0 0</pose>
+      <link name="link">
+        <visual name="visual">
+          <geometry><sphere><radius>0.012</radius></sphere></geometry>
+          <material><ambient>0.75 0.05 0.05 1</ambient><diffuse>0.85 0.08 0.08 1</diffuse></material>
+        </visual>
+      </link>
+    </model>
+
+    <model name="row0_R_plant9_foliage">
+      <static>true</static>
+      <pose>2.850 -0.200 1.180 0 0 0</pose>
+      <link name="link">
+        <visual name="visual">
+          <geometry><box><size>0.14 0.14 0.10</size></box></geometry>
+          <material><ambient>0.10 0.35 0.10 1</ambient><diffuse>0.15 0.45 0.15 1</diffuse></material>
+        </visual>
+      </link>
+    </model>
+    <model name="row0_R_plant9_berry_0">
+      <static>true</static>
+      <pose>2.820 -0.240 1.070 0 0 0</pose>
+      <link name="link">
+        <visual name="visual">
+          <geometry><sphere><radius>0.012</radius></sphere></geometry>
+          <material><ambient>0.75 0.05 0.05 1</ambient><diffuse>0.85 0.08 0.08 1</diffuse></material>
+        </visual>
+      </link>
+    </model>
+    <model name="row0_R_plant9_berry_1">
+      <static>true</static>
+      <pose>2.870 -0.170 1.050 0 0 0</pose>
+      <link name="link">
+        <visual name="visual">
+          <geometry><sphere><radius>0.012</radius></sphere></geometry>
+          <material><ambient>0.75 0.05 0.05 1</ambient><diffuse>0.85 0.08 0.08 1</diffuse></material>
+        </visual>
+      </link>
+    </model>
+
+    <model name="row0_R_plant10_foliage">
+      <static>true</static>
+      <pose>3.150 -0.200 1.180 0 0 0</pose>
+      <link name="link">
+        <visual name="visual">
+          <geometry><box><size>0.14 0.14 0.10</size></box></geometry>
+          <material><ambient>0.10 0.35 0.10 1</ambient><diffuse>0.15 0.45 0.15 1</diffuse></material>
+        </visual>
+      </link>
+    </model>
+    <model name="row0_R_plant10_berry_0">
+      <static>true</static>
+      <pose>3.120 -0.240 1.070 0 0 0</pose>
+      <link name="link">
+        <visual name="visual">
+          <geometry><sphere><radius>0.012</radius></sphere></geometry>
+          <material><ambient>0.75 0.05 0.05 1</ambient><diffuse>0.85 0.08 0.08 1</diffuse></material>
+        </visual>
+      </link>
+    </model>
+    <model name="row0_R_plant10_berry_1">
+      <static>true</static>
+      <pose>3.170 -0.170 1.050 0 0 0</pose>
+      <link name="link">
+        <visual name="visual">
+          <geometry><sphere><radius>0.012</radius></sphere></geometry>
+          <material><ambient>0.75 0.05 0.05 1</ambient><diffuse>0.85 0.08 0.08 1</diffuse></material>
+        </visual>
+      </link>
+    </model>
+
+    <model name="row0_R_plant11_foliage">
+      <static>true</static>
+      <pose>3.450 -0.200 1.180 0 0 0</pose>
+      <link name="link">
+        <visual name="visual">
+          <geometry><box><size>0.14 0.14 0.10</size></box></geometry>
+          <material><ambient>0.10 0.35 0.10 1</ambient><diffuse>0.15 0.45 0.15 1</diffuse></material>
+        </visual>
+      </link>
+    </model>
+    <model name="row0_R_plant11_berry_0">
+      <static>true</static>
+      <pose>3.420 -0.240 1.070 0 0 0</pose>
+      <link name="link">
+        <visual name="visual">
+          <geometry><sphere><radius>0.012</radius></sphere></geometry>
+          <material><ambient>0.75 0.05 0.05 1</ambient><diffuse>0.85 0.08 0.08 1</diffuse></material>
+        </visual>
+      </link>
+    </model>
+    <model name="row0_R_plant11_berry_1">
+      <static>true</static>
+      <pose>3.470 -0.170 1.050 0 0 0</pose>
+      <link name="link">
+        <visual name="visual">
+          <geometry><sphere><radius>0.012</radius></sphere></geometry>
+          <material><ambient>0.75 0.05 0.05 1</ambient><diffuse>0.85 0.08 0.08 1</diffuse></material>
+        </visual>
+      </link>
+    </model>
+
+    <model name="row0_R_plant12_foliage">
+      <static>true</static>
+      <pose>3.750 -0.200 1.180 0 0 0</pose>
+      <link name="link">
+        <visual name="visual">
+          <geometry><box><size>0.14 0.14 0.10</size></box></geometry>
+          <material><ambient>0.10 0.35 0.10 1</ambient><diffuse>0.15 0.45 0.15 1</diffuse></material>
+        </visual>
+      </link>
+    </model>
+    <model name="row0_R_plant12_berry_0">
+      <static>true</static>
+      <pose>3.720 -0.240 1.070 0 0 0</pose>
+      <link name="link">
+        <visual name="visual">
+          <geometry><sphere><radius>0.012</radius></sphere></geometry>
+          <material><ambient>0.75 0.05 0.05 1</ambient><diffuse>0.85 0.08 0.08 1</diffuse></material>
+        </visual>
+      </link>
+    </model>
+    <model name="row0_R_plant12_berry_1">
+      <static>true</static>
+      <pose>3.770 -0.170 1.050 0 0 0</pose>
+      <link name="link">
+        <visual name="visual">
+          <geometry><sphere><radius>0.012</radius></sphere></geometry>
+          <material><ambient>0.75 0.05 0.05 1</ambient><diffuse>0.85 0.08 0.08 1</diffuse></material>
+        </visual>
+      </link>
+    </model>
+
+    <model name="row0_R_plant13_foliage">
+      <static>true</static>
+      <pose>4.050 -0.200 1.180 0 0 0</pose>
+      <link name="link">
+        <visual name="visual">
+          <geometry><box><size>0.14 0.14 0.10</size></box></geometry>
+          <material><ambient>0.10 0.35 0.10 1</ambient><diffuse>0.15 0.45 0.15 1</diffuse></material>
+        </visual>
+      </link>
+    </model>
+    <model name="row0_R_plant13_berry_0">
+      <static>true</static>
+      <pose>4.020 -0.240 1.070 0 0 0</pose>
+      <link name="link">
+        <visual name="visual">
+          <geometry><sphere><radius>0.012</radius></sphere></geometry>
+          <material><ambient>0.75 0.05 0.05 1</ambient><diffuse>0.85 0.08 0.08 1</diffuse></material>
+        </visual>
+      </link>
+    </model>
+    <model name="row0_R_plant13_berry_1">
+      <static>true</static>
+      <pose>4.070 -0.170 1.050 0 0 0</pose>
+      <link name="link">
+        <visual name="visual">
+          <geometry><sphere><radius>0.012</radius></sphere></geometry>
+          <material><ambient>0.75 0.05 0.05 1</ambient><diffuse>0.85 0.08 0.08 1</diffuse></material>
+        </visual>
+      </link>
+    </model>
+
+    <model name="row0_R_plant14_foliage">
+      <static>true</static>
+      <pose>4.350 -0.200 1.180 0 0 0</pose>
+      <link name="link">
+        <visual name="visual">
+          <geometry><box><size>0.14 0.14 0.10</size></box></geometry>
+          <material><ambient>0.10 0.35 0.10 1</ambient><diffuse>0.15 0.45 0.15 1</diffuse></material>
+        </visual>
+      </link>
+    </model>
+    <model name="row0_R_plant14_berry_0">
+      <static>true</static>
+      <pose>4.320 -0.240 1.070 0 0 0</pose>
+      <link name="link">
+        <visual name="visual">
+          <geometry><sphere><radius>0.012</radius></sphere></geometry>
+          <material><ambient>0.75 0.05 0.05 1</ambient><diffuse>0.85 0.08 0.08 1</diffuse></material>
+        </visual>
+      </link>
+    </model>
+    <model name="row0_R_plant14_berry_1">
+      <static>true</static>
+      <pose>4.370 -0.170 1.050 0 0 0</pose>
+      <link name="link">
+        <visual name="visual">
+          <geometry><sphere><radius>0.012</radius></sphere></geometry>
+          <material><ambient>0.75 0.05 0.05 1</ambient><diffuse>0.85 0.08 0.08 1</diffuse></material>
+        </visual>
+      </link>
+    </model>
+
+    <model name="row0_R_plant15_foliage">
+      <static>true</static>
+      <pose>4.650 -0.200 1.180 0 0 0</pose>
+      <link name="link">
+        <visual name="visual">
+          <geometry><box><size>0.14 0.14 0.10</size></box></geometry>
+          <material><ambient>0.10 0.35 0.10 1</ambient><diffuse>0.15 0.45 0.15 1</diffuse></material>
+        </visual>
+      </link>
+    </model>
+    <model name="row0_R_plant15_berry_0">
+      <static>true</static>
+      <pose>4.620 -0.240 1.070 0 0 0</pose>
+      <link name="link">
+        <visual name="visual">
+          <geometry><sphere><radius>0.012</radius></sphere></geometry>
+          <material><ambient>0.75 0.05 0.05 1</ambient><diffuse>0.85 0.08 0.08 1</diffuse></material>
+        </visual>
+      </link>
+    </model>
+    <model name="row0_R_plant15_berry_1">
+      <static>true</static>
+      <pose>4.670 -0.170 1.050 0 0 0</pose>
+      <link name="link">
+        <visual name="visual">
+          <geometry><sphere><radius>0.012</radius></sphere></geometry>
+          <material><ambient>0.75 0.05 0.05 1</ambient><diffuse>0.85 0.08 0.08 1</diffuse></material>
+        </visual>
+      </link>
+    </model>
+
+    <model name="row0_R_plant16_foliage">
+      <static>true</static>
+      <pose>4.950 -0.200 1.180 0 0 0</pose>
+      <link name="link">
+        <visual name="visual">
+          <geometry><box><size>0.14 0.14 0.10</size></box></geometry>
+          <material><ambient>0.10 0.35 0.10 1</ambient><diffuse>0.15 0.45 0.15 1</diffuse></material>
+        </visual>
+      </link>
+    </model>
+    <model name="row0_R_plant16_berry_0">
+      <static>true</static>
+      <pose>4.920 -0.240 1.070 0 0 0</pose>
+      <link name="link">
+        <visual name="visual">
+          <geometry><sphere><radius>0.012</radius></sphere></geometry>
+          <material><ambient>0.75 0.05 0.05 1</ambient><diffuse>0.85 0.08 0.08 1</diffuse></material>
+        </visual>
+      </link>
+    </model>
+    <model name="row0_R_plant16_berry_1">
+      <static>true</static>
+      <pose>4.970 -0.170 1.050 0 0 0</pose>
+      <link name="link">
+        <visual name="visual">
+          <geometry><sphere><radius>0.012</radius></sphere></geometry>
+          <material><ambient>0.75 0.05 0.05 1</ambient><diffuse>0.85 0.08 0.08 1</diffuse></material>
+        </visual>
+      </link>
+    </model>
+
+    <model name="row0_R_plant17_foliage">
+      <static>true</static>
+      <pose>5.250 -0.200 1.180 0 0 0</pose>
+      <link name="link">
+        <visual name="visual">
+          <geometry><box><size>0.14 0.14 0.10</size></box></geometry>
+          <material><ambient>0.10 0.35 0.10 1</ambient><diffuse>0.15 0.45 0.15 1</diffuse></material>
+        </visual>
+      </link>
+    </model>
+    <model name="row0_R_plant17_berry_0">
+      <static>true</static>
+      <pose>5.220 -0.240 1.070 0 0 0</pose>
+      <link name="link">
+        <visual name="visual">
+          <geometry><sphere><radius>0.012</radius></sphere></geometry>
+          <material><ambient>0.75 0.05 0.05 1</ambient><diffuse>0.85 0.08 0.08 1</diffuse></material>
+        </visual>
+      </link>
+    </model>
+    <model name="row0_R_plant17_berry_1">
+      <static>true</static>
+      <pose>5.270 -0.170 1.050 0 0 0</pose>
+      <link name="link">
+        <visual name="visual">
+          <geometry><sphere><radius>0.012</radius></sphere></geometry>
+          <material><ambient>0.75 0.05 0.05 1</ambient><diffuse>0.85 0.08 0.08 1</diffuse></material>
+        </visual>
+      </link>
+    </model>
+
+    <model name="row0_R_plant18_foliage">
+      <static>true</static>
+      <pose>5.550 -0.200 1.180 0 0 0</pose>
+      <link name="link">
+        <visual name="visual">
+          <geometry><box><size>0.14 0.14 0.10</size></box></geometry>
+          <material><ambient>0.10 0.35 0.10 1</ambient><diffuse>0.15 0.45 0.15 1</diffuse></material>
+        </visual>
+      </link>
+    </model>
+    <model name="row0_R_plant18_berry_0">
+      <static>true</static>
+      <pose>5.520 -0.240 1.070 0 0 0</pose>
+      <link name="link">
+        <visual name="visual">
+          <geometry><sphere><radius>0.012</radius></sphere></geometry>
+          <material><ambient>0.75 0.05 0.05 1</ambient><diffuse>0.85 0.08 0.08 1</diffuse></material>
+        </visual>
+      </link>
+    </model>
+    <model name="row0_R_plant18_berry_1">
+      <static>true</static>
+      <pose>5.570 -0.170 1.050 0 0 0</pose>
+      <link name="link">
+        <visual name="visual">
+          <geometry><sphere><radius>0.012</radius></sphere></geometry>
+          <material><ambient>0.75 0.05 0.05 1</ambient><diffuse>0.85 0.08 0.08 1</diffuse></material>
+        </visual>
+      </link>
+    </model>
+
+    <model name="row0_R_plant19_foliage">
+      <static>true</static>
+      <pose>5.850 -0.200 1.180 0 0 0</pose>
+      <link name="link">
+        <visual name="visual">
+          <geometry><box><size>0.14 0.14 0.10</size></box></geometry>
+          <material><ambient>0.10 0.35 0.10 1</ambient><diffuse>0.15 0.45 0.15 1</diffuse></material>
+        </visual>
+      </link>
+    </model>
+    <model name="row0_R_plant19_berry_0">
+      <static>true</static>
+      <pose>5.820 -0.240 1.070 0 0 0</pose>
+      <link name="link">
+        <visual name="visual">
+          <geometry><sphere><radius>0.012</radius></sphere></geometry>
+          <material><ambient>0.75 0.05 0.05 1</ambient><diffuse>0.85 0.08 0.08 1</diffuse></material>
+        </visual>
+      </link>
+    </model>
+    <model name="row0_R_plant19_berry_1">
+      <static>true</static>
+      <pose>5.870 -0.170 1.050 0 0 0</pose>
+      <link name="link">
+        <visual name="visual">
+          <geometry><sphere><radius>0.012</radius></sphere></geometry>
+          <material><ambient>0.75 0.05 0.05 1</ambient><diffuse>0.85 0.08 0.08 1</diffuse></material>
+        </visual>
+      </link>
+    </model>
+
+    <model name="row0_threshold0">
+      <static>true</static>
+      <pose>2.000 0.000 0.0060 0 0 0</pose>
+      <link name="link">
+        <collision name="collision">
+          <geometry><box><size>0.030 0.400 0.0120</size></box></geometry>
+        </collision>
+        <visual name="visual">
+          <geometry><box><size>0.030 0.400 0.0120</size></box></geometry>
+          <material><ambient>0.5 0.45 0.35 1</ambient><diffuse>0.55 0.5 0.4 1</diffuse></material>
+        </visual>
+      </link>
+    </model>
+
+    <model name="row0_threshold1">
+      <static>true</static>
+      <pose>4.000 0.000 0.0060 0 0 0</pose>
+      <link name="link">
+        <collision name="collision">
+          <geometry><box><size>0.030 0.400 0.0120</size></box></geometry>
+        </collision>
+        <visual name="visual">
+          <geometry><box><size>0.030 0.400 0.0120</size></box></geometry>
+          <material><ambient>0.5 0.45 0.35 1</ambient><diffuse>0.55 0.5 0.4 1</diffuse></material>
+        </visual>
+      </link>
+    </model>
+
+  </world>
+</sdf>

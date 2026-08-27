@@ -1,0 +1,41 @@
+<?xml version="1.0"?>
+<package format="3">
+  <name>strawberry_amr_gazebo</name>
+  <version>0.1.0</version>
+  <description>Gazebo Classic simulation of the strawberry tabletop AMR in a generated Irish polytunnel world -- dev-Orin only, not for the Pi rig.</description>
+  <maintainer email="prasiddh@example.com">Prasiddh</maintainer>
+  <license>MIT</license>
+  <buildtool_depend>ament_cmake</buildtool_depend>
+  <exec_depend>gazebo_ros</exec_depend>
+  <exec_depend>gazebo_plugins</exec_depend>
+  <exec_depend>robot_description</exec_depend>
+  <exec_depend>robot_state_publisher</exec_depend>
+  <exec_depend>xacro</exec_depend>
+  <exec_depend>imu_filter_madgwick</exec_depend>
+  <exec_depend>robot_localization</exec_depend>
+  <exec_depend>row_navigation</exec_depend>
+  <exec_depend>safety_supervisor</exec_depend>
+  <exec_depend>twist_mux</exec_depend>
+  <exec_depend>slam_toolbox</exec_depend>
+  <exec_depend>coverage_planner</exec_depend>
+  <exec_depend>mission_control</exec_depend>
+  <exec_depend>plant_perception</exec_depend>
+  <exec_depend>semantic_mapper</exec_depend>
+  <exec_depend>target_manager</exec_depend>
+  <exec_depend>nav2_bringup</exec_depend>
+  <exec_depend>python3-argparse</exec_depend>
+  <!-- Directly imported by scripts/gl_fopid_rl/gazebo_env.py (the RL
+       training environment's real ROS backend) and by the launch files.
+       rclpy/sensor_msgs/std_msgs would previously have arrived only
+       transitively via other exec_depends ; declared explicitly now
+       because this package genuinely imports them itself. -->
+  <exec_depend>ament_index_python</exec_depend>
+  <exec_depend>rclpy</exec_depend>
+  <exec_depend>sensor_msgs</exec_depend>
+  <exec_depend>std_msgs</exec_depend>
+  <exec_depend>python3-numpy</exec_depend>
+  <test_depend>ament_lint_auto</test_depend>
+  <export>
+    <build_type>ament_cmake</build_type>
+  </export>
+</package>

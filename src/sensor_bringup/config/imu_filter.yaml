@@ -1,0 +1,12 @@
+# Madgwick orientation filter for the MPU-9250 (onboard the YB-ERF01-V2.0).
+# Magnetometer is DISABLED (use_mag:false): the drive motors (direct on the
+# YB-ERF01's own driver channels in this build -- no external Cytron drivers)
+# corrupt the magnetometer, so absolute heading is not used; only relative
+# yaw is fused.
+imu_filter_madgwick:
+  ros__parameters:
+    use_mag: false
+    world_frame: enu
+    publish_tf: false
+    gain: 0.1
+    fixed_frame: imu_link

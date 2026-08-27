@@ -1,0 +1,18 @@
+# Pip-only dependencies for zero-shot perception (Grounding DINO + MobileSAM).
+# See docs/ZERO_SHOT_PERCEPTION_GUIDE.md for the full setup sequence --
+# this file alone is NOT sufficient, because torch on Jetson is NOT the
+# plain PyPI wheel (that one is x86_64/CPU-only and will silently fail
+# the force_cuda check at node startup, which is the correct, intended
+# failure -- see plant_detector_zeroshot_node.py's _init_models).
+#
+# Install order matters:
+#   1. Install NVIDIA's own Jetson PyTorch build FIRST (see the guide --
+#      this is NOT `pip install torch`).
+#   2. THEN: pip install -r requirements.txt --break-system-packages
+#
+# Only needed for detector:='zeroshot'. The default detector:='hsv'
+# (plant_detector_node.py) needs none of this -- no GPU, no model, no
+# download.
+transformers>=4.44.0
+huggingface-hub
+pillow

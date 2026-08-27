@@ -1,0 +1,92 @@
+row_nav_node:
+  ros__parameters:
+    # ---- FOPID (Orman/Basci/Derdiyok 2016; Cao 2022) ----
+    Kp_theta: 1.2
+    Ki_theta: 0.25
+    Kd_theta: 0.30
+    fopid_lambda: 0.4          # fractional integral order  (lambda)
+    fopid_mu: 0.7              # fractional derivative order (mu)
+    gl_history_length: 20      # Gruenwald-Letnikov memory window
+    k_cross_track: 0.8         # cross-track (lateral) feedback gain
+
+    # ---- speeds ----
+    nominal_linear_speed: 0.20
+    min_linear_speed: 0.05
+    max_angular_speed: 0.6
+    align_slowdown: 1.2
+
+    # ---- tabletop corridor geometry (metres) ----
+    fwd_window_min: 0.15
+    fwd_window_max: 2.0
+    num_bins: 8
+    side_gate: 0.10
+    target_half_width: 0.20    # half-aisle-width FALLBACK used only when one side's
+                                # posts are occluded in a bin (see row_nav_node.py's
+                                # use of self.half_w) -- this is NOT the same
+                                # quantity as coverage_planner's row_spacing (that's
+                                # centreline-to-centreline between ADJACENT rows).
+                                # BUG FIX: this used to be 0.50, identical to the
+                                # 0.50 row_spacing default -- meaning two adjacent
+                                # rows' assumed post lines would sit exactly on top
+                                # of each other, which is physically meaningless.
+                                # Must satisfy 2*target_half_width < row_spacing
+                                # with real margin for the post/trough structure's
+                                # own width -- see GAZEBO_SIMULATION_GUIDE.md for
+                                # the worked layout this now assumes.
+
+    # ---- chassis geometry -- CAD-sourced from the real yahboomcar_R2.urdf.xacro
+    # (see docs/MOTOR_AND_GEOMETRY_VERIFICATION.md for the extraction); a bench
+    # confirmation of max_steer_angle is still recommended (CAD joint limits
+    # don't always equal the real assembled unit's achievable range) per
+    # docs/SENSOR_CALIBRATION_AND_BRINGUP_GUIDE.md Part 1. Update here AND in
+    # the URDF's xacro:property values (strawberry_amr.urdf.xacro) together
+    # if you ever revise either. ----
+    # row_spacing was DECLARED in row_nav_node.py (default 0.50) but was
+    # absent from this file -- meaning if you set your real row spacing in
+    # coverage_params.yaml and target_manager_params.yaml but not here,
+    # row-following silently kept the 0.50 code default while the rest of
+    # the stack used your value. Surfaced explicitly now so all three
+    # places are visible and editable together.
+    # MUST match coverage_params.yaml and target_manager_params.yaml.
+    row_spacing: 0.50
+    wheelbase: 0.2353            # L (m), CAD-sourced from the real yahboomcar_R2.urdf.xacro
+    max_steer_angle: 0.6         # delta_max (rad, 34.4 deg), CAD joint limit -- see
+                                  # docs/MOTOR_AND_GEOMETRY_VERIFICATION.md for the extraction
+
+    # ---- RANSAC on corridor centre points ----
+    ransac_iterations: 50
+    ransac_inlier_threshold: 0.05
+    ransac_min_points: 3
+
+    # ---- row-end / headland ----
+    row_end_min_side_points: 6
+    # headland_exit_buffer was DECLARED in row_nav_node.py (default 0.40)
+    # but was absent from this file -- the same silent-code-default trap
+    # already documented above for row_spacing. Surfaced explicitly now.
+    headland_exit_buffer: 0.40   # straight creep past row end before arcing (m)
+    headland_turn_speed: 0.5
+    # NOTE: there is deliberately no 'headland_turn_angle' here. An earlier
+    # revision had one (3.14159), left over from a simple "spin 180 deg"
+    # design -- it was declared by no node and read by no code, so editing
+    # it did nothing at all, which is a genuine trap while tuning. The real
+    # turn geometry is SOLVED AT STARTUP by _bulb_turn_split() in
+    # row_nav_node.py from min_turn_radius + row_spacing, and the 180 deg
+    # net heading reversal is guaranteed by construction (phi2 = pi - phi1).
+    # To change the turn, change those inputs -- not a turn angle.
+    headland_yaw_tol: 0.08
+    headland_reacquire_time: 1.5
+    headland_reacquire_speed: 0.06
+    odom_timeout: 1.0           # s -- halt (ODOM_LOST_HALT) if /odometry/filtered
+                                  # goes stale mid-headland-manoeuvre; see row_nav_node.py
+    # Reactive row-discovery for exploring an UNKNOWN tunnel (no pre-existing
+    # map/route) -- see row_nav_node.py's own comments on the REACQUIRE
+    # block for the full state machine. False (default) preserves the
+    # original behaviour exactly: coverage_planner's pre-configured route
+    # is used and REACQUIRE always transitions back to FOLLOW. Set true
+    # only via the Orin's continuous-explore launch profile -- see
+    # docs/ORIN_PI_SPLIT_ARCHITECTURE.md.
+    exploration_mode: false
+    alternate_turn_direction: true
+
+    # ---- safety ----
+    autostart: false           # robot will NOT move until /autonomy_enable=true

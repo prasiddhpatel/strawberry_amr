@@ -1,0 +1,13 @@
+# Pip-only dependencies for GL-FOPID RL tuning (docs/GL_FOPID_RL_TUNING_GUIDE.md).
+# These are NOT ROS packages -- install with pip, not rosdep/apt.
+# Install on the LAPTOP only; this training tooling never runs on the Pi.
+#
+#   pip install -r requirements.txt --break-system-packages
+#
+# Versions below are what this workspace's own pipeline was actually
+# built and verified against (including running real PPO training steps
+# and Stable-Baselines3's own environment checker) -- not just assumed
+# compatible.
+gymnasium==1.3.0
+stable-baselines3==2.9.0
+nbformat==5.10.4

@@ -1,0 +1,12 @@
+mission_control_node:
+  ros__parameters:
+    phase: nav                       # 'mapping' | 'nav' | 'explore' -- set per launch file, see mission_control_node.py
+    rows_to_cover: 6                 # fallback if coverage_planner's /coverage_plan isn't received
+    enable_plant_approach: true
+    plant_confirm_pause_s: 3.0       # stop-and-confirm dwell per plant, NOT an arm wait
+    approach_cooldown: 5.0
+    nav2_wait_timeout: 5.0
+    map_save_path: "~/ros2_ws/maps/tunnel_map"  # used by the "finish_mapping" command (Phase 1 only)
+    zeroshot_enabled: false           # overridden per-launch-file from the same
+                                       # detector:= argument that selects the
+                                       # perception node -- don't set by hand

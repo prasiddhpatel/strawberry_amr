@@ -1,0 +1,11 @@
+# Small OVERRIDE layer, not a standalone config -- pass this file AFTER
+# row_navigation_params.yaml in the same launch Node()'s `parameters=[...]`
+# list so ROS 2 layers it on top (later files win on any key both define).
+# Deliberately NOT a full duplicate copy of row_navigation_params.yaml --
+# duplicating the whole file risks the two copies silently drifting apart
+# over time, which is exactly the class of bug this workspace has caught
+# and fixed more than once already. Only the ONE key that actually differs
+# for continuous exploration lives here.
+row_nav_node:
+  ros__parameters:
+    exploration_mode: true

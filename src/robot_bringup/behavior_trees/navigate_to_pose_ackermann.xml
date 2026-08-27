@@ -1,0 +1,52 @@
+<!--
+  Ackermann-safe NavigateToPose tree.
+
+  This is the standard Nav2 "navigate_to_pose_w_replanning_and_recovery"
+  structure (RecoveryNode wrapping a replanning PipelineSequence, with a
+  round-robin recovery subtree), with ONE deliberate change: the recovery
+  round-robin uses ONLY Wait and BackUp, never Spin.
+
+  WHY: an Ackermann (rear-drive, front-steer) vehicle cannot rotate in
+  place; yaw rate requires nonzero forward/reverse speed (omega = v *
+  tan(delta)/L). Spin commands a pure rotation (v=0, omega!=0), which is not
+  a physically achievable command on this chassis at all — so a Spin
+  recovery would likely do nothing physically while the behavior tree
+  believes it succeeded after its timer elapsed. behavior_server
+  (nav2_params.yaml) does not register a 'spin' plugin at all for the same
+  reason; keep this file and that registration in sync if you revisit
+  either.
+
+  ClearEntireCostmap actions are kept (they are not a motion command, just
+  a costmap reset, and cost nothing extra to attempt before backing up).
+-->
+<root BTCPP_format="4" main_tree_to_execute="MainTree">
+  <BehaviorTree ID="MainTree">
+    <RecoveryNode number_of_retries="6" name="NavigateRecovery">
+      <PipelineSequence name="NavigateWithReplanning">
+        <RateController hz="1.0">
+          <RecoveryNode number_of_retries="1" name="ComputePathToPose">
+            <ComputePathToPose goal="{goal}" path="{path}" planner_id="GridBased"/>
+            <ClearEntireCostmap name="ClearGlobalCostmap-Context" service_name="global_costmap/clear_entirely_global_costmap"/>
+          </RecoveryNode>
+        </RateController>
+        <RecoveryNode number_of_retries="1" name="FollowPath">
+          <FollowPath path="{path}" controller_id="FollowPath"/>
+          <ClearEntireCostmap name="ClearLocalCostmap-Context" service_name="local_costmap/clear_entirely_local_costmap"/>
+        </RecoveryNode>
+      </PipelineSequence>
+
+      <!-- Recovery round-robin: Wait, then Backup. NO Spin; see header. -->
+      <ReactiveFallback name="RecoveryFallback">
+        <GoalUpdated/>
+        <RoundRobin name="RecoveryActions">
+          <Sequence name="ClearingActions">
+            <ClearEntireCostmap name="ClearLocalCostmap-Subtree" service_name="local_costmap/clear_entirely_local_costmap"/>
+            <ClearEntireCostmap name="ClearGlobalCostmap-Subtree" service_name="global_costmap/clear_entirely_global_costmap"/>
+          </Sequence>
+          <Wait wait_duration="3.0"/>
+          <BackUp backup_dist="0.20" backup_speed="0.15"/>
+        </RoundRobin>
+      </ReactiveFallback>
+    </RecoveryNode>
+  </BehaviorTree>
+</root>

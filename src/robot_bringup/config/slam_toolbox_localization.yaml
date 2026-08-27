@@ -1,0 +1,36 @@
+# Phase 2 (harvest execution) slam_toolbox config: LOCALIZATION mode against
+# the pose-graph serialized at the end of Phase 1, instead of continuing to
+# map. Publishes /map (from the loaded, frozen graph) and map->odom (from
+# scan-matching localization against it) -- the same two things Nav2's
+# global_costmap static_layer and the rest of the stack need, using the SAME
+# technology as Phase 1 rather than introducing a second localizer (e.g.
+# AMCL) for no reason. See DEPLOYMENT_GUIDE.md, "End of Phase 1" for how to
+# produce the .posegraph file this points at.
+slam_toolbox:
+  ros__parameters:
+    solver_plugin: solver_plugins::CeresSolver
+    ceres_linear_solver: SPARSE_NORMAL_CHOLESKY
+    ceres_preconditioner: SCHUR_JACOBI
+    ceres_trust_strategy: LEVENBERG_MARQUARDT
+    mode: localization
+
+    # EDIT to the actual saved file for this tunnel before launching Phase 2.
+    # No default is supplied deliberately -- launching Phase 2 against the
+    # WRONG (or a stale) map is worse than the launch failing loudly.
+    map_file_name: /home/pi/strawberry_maps/REPLACE_ME_tunnel_map
+    map_start_pose: [0.0, 0.0, 0.0]
+
+    odom_frame: odom
+    map_frame: map
+    base_frame: base_link
+    scan_topic: /scan
+    use_scan_matching: true
+
+    resolution: 0.05
+    max_laser_range: 12.0
+    minimum_travel_distance: 0.10
+    minimum_travel_heading: 0.10
+    map_update_interval: 2.0
+    transform_publish_period: 0.05
+    loop_search_maximum_distance: 3.0
+    do_loop_closing: false   # frozen map -- no further loop closure during execution
