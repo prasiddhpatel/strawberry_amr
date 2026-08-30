@@ -1,10 +1,23 @@
 """
-Manual-drive-only launch: joystick -> twist_mux -> base_controller (which now
-performs the Ackermann conversion itself via Rosmaster_Lib's set_car_motion()
--- see base_controller_node.py's module docstring). No EKF, no SLAM, no
-autonomy. For a first power-on test of the drivetrain itself (does the robot
-drive and steer correctly when you move the sticks) before trusting it with
-any sensor-driven autonomy.
+Manual-drive-only launch: joystick -> twist_mux_pi_local -> base_controller
+(which now performs the Ackermann conversion itself via Rosmaster_Lib's
+set_car_motion() -- see base_controller_node.py's module docstring). No EKF,
+no SLAM, no autonomy. For a first power-on test of the drivetrain itself
+(does the robot drive and steer correctly when you move the sticks) before
+trusting it with any sensor-driven autonomy.
+
+FIXED 2026-08-30 (Stage 9 bench test, docs/MASTER_DEPLOYMENT_COMMANDS.md):
+this file used to launch `twist_mux` with `twist_mux.yaml` -- the Orin-side,
+AUTONOMY-ONLY config (see that file's own header comment). That config's
+only real inputs are /cmd_vel_nav and /cmd_vel_safe; it has no subscription
+to /cmd_vel_teleop at all, so joystick_node's output went nowhere and the
+robot never moved regardless of stick input, with no error anywhere in the
+stack -- twist_mux simply never had a reason to publish. This was leftover
+from before the two-stage twist_mux split (see base_controller_node.py's
+own docstring and docs/ORIN_PI_SPLIT_ARCHITECTURE.md); the correct config
+for a Pi-local manual-drive path is twist_mux_pi_local.yaml, node name
+twist_mux_pi_local, exactly as pi_hardware_and_control.launch.py already
+does it correctly -- this file just never got updated to match.
 """
 import os
 from ament_index_python.packages import get_package_share_directory
@@ -20,7 +33,7 @@ def generate_launch_description():
     sensors = get_package_share_directory('sensor_bringup')
     teleop = get_package_share_directory('teleop_ps2')
     basec = get_package_share_directory('base_controller')
-    mux = os.path.join(bringup, 'config', 'twist_mux.yaml')
+    mux = os.path.join(bringup, 'config', 'twist_mux_pi_local.yaml')
     ps2_cfg = os.path.join(teleop, 'config', 'ps2_mapping.yaml')
     base_cfg = os.path.join(basec, 'config', 'base_controller_params.yaml')
 
@@ -40,7 +53,7 @@ def generate_launch_description():
              name='joystick_node', output='screen', parameters=[ps2_cfg]),
         Node(package='safety_supervisor', executable='safety_supervisor_node',
              name='safety_supervisor_node', output='screen'),
-        Node(package='twist_mux', executable='twist_mux', name='twist_mux',
-             output='screen', parameters=[mux],
+        Node(package='twist_mux', executable='twist_mux',
+             name='twist_mux_pi_local', output='screen', parameters=[mux],
              remappings=[('/cmd_vel_out', '/cmd_vel')]),
     ])
