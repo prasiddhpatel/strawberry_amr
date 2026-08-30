@@ -162,6 +162,40 @@ class Rosmaster(object):
             self.__mx = struct.unpack('h', bytearray(ext_data[12:14]))[0]*mag_ratio
             self.__my = struct.unpack('h', bytearray(ext_data[14:16]))[0]*mag_ratio
             self.__mz = struct.unpack('h', bytearray(ext_data[16:18]))[0]*mag_ratio
+        # NOT in the original vendor source -- added after bench verification
+        # on this YB-ERF01/R2 board, 2026-08-30 (see docs/MASTER_DEPLOYMENT_
+        # COMMANDS.md Stage 7). This board's firmware auto-report cycle is
+        # actually 0x0A/0x0C/0x0D/0x0E, NOT 0x0A/0x0B/0x0C/0x0D as this
+        # library version (v2.3.3) assumes: FUNC_REPORT_IMU_RAW (0x0B, the
+        # elif above) is never sent by this firmware, so get_accelerometer_
+        # data()/get_gyroscope_data() returned frozen zeros before this
+        # branch existed. ext_type 0x0E carries the same 9-value
+        # (gx,gy,gz,ax,ay,az,mx,my,mz) shape but pre-scaled to SI as
+        # raw/1000.0 (the same int16/1000.0 pattern FUNC_REPORT_SPEED above
+        # already uses), not the raw-ADC-count encoding gyro_ratio/
+        # accel_ratio above expect. Confirmed for accel only: a stationary,
+        # level bench capture's decoded vector magnitude is ~9.8 m/s^2 (SI
+        # units, no further g->m/s^2 conversion needed) only under this
+        # /1000.0 interpretation -- the old accel_ratio interpretation of
+        # the same bytes gives ~57 m/s^2, physically impossible at rest.
+        # Gyro here follows the same /1000.0 scale by analogy (same packet,
+        # same apparent encoding convention) but is NOT independently bench-
+        # verified the way accel is, and unlike the elif above, NEITHER axis
+        # is sign-flipped here (no evidence either way from a stationary-only
+        # test) -- confirm sign/scale at the Stage 10 gyro check
+        # (rotate a known 90 degrees, compare filtered yaw) before trusting
+        # it. Magnetometer likewise left unscaled/unverified, matching the
+        # equally-unverified mag_ratio=1 convention already used above.
+        elif ext_type == 0x0E:
+            self.__gx = struct.unpack('h', bytearray(ext_data[0:2]))[0] / 1000.0
+            self.__gy = struct.unpack('h', bytearray(ext_data[2:4]))[0] / 1000.0
+            self.__gz = struct.unpack('h', bytearray(ext_data[4:6]))[0] / 1000.0
+            self.__ax = struct.unpack('h', bytearray(ext_data[6:8]))[0] / 1000.0
+            self.__ay = struct.unpack('h', bytearray(ext_data[8:10]))[0] / 1000.0
+            self.__az = struct.unpack('h', bytearray(ext_data[10:12]))[0] / 1000.0
+            self.__mx = struct.unpack('h', bytearray(ext_data[12:14]))[0]
+            self.__my = struct.unpack('h', bytearray(ext_data[14:16]))[0]
+            self.__mz = struct.unpack('h', bytearray(ext_data[16:18]))[0]
         # 解析板子的姿态角
         # the attitude Angle of the board
         # elif ext_type == self.FUNC_REPORT_IMU_ATT:

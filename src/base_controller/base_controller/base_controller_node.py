@@ -69,15 +69,21 @@ an Ackermann bicycle-model command converter ourselves:
     diagnostic topic for the encoder bench-check in the calibration guide,
     but are NOT the primary odometry input.
 
-REMAINING GENUINE UNCERTAINTY (flagged, not hidden): accel_ratio's output
-units are not stated in the vendored source (gyro_ratio's inline comment
-says "+/-500dps" explicitly; accel_ratio has no equivalent comment). This
-node assumes the conventional IMU-wrapper pattern of accelerometer output
-already in g's, multiplying by G_TO_MS2 below to get m/s^2 for the ROS Imu
-message. VERIFY this against docs/SENSOR_CALIBRATION_AND_BRINGUP_GUIDE.md
-Part 3.2's stationary check: a level, stationary reading should show ~9.8
-on the vertical axis of /imu/data_raw -- if it instead shows ~1.0, the
-raw ratio is already m/s^2 and G_TO_MS2 below should be set to 1.0.
+BENCH-VERIFIED 2026-08-30 (was "REMAINING GENUINE UNCERTAINTY" -- resolved
+by the Stage 7 bench check, docs/MASTER_DEPLOYMENT_COMMANDS.md): the
+original open question here was whether accel_ratio's output (unlike
+gyro_ratio's explicitly-documented "+/-500dps") was in g's or already
+m/s^2. That question turned out to be moot -- this board's firmware never
+sends FUNC_REPORT_IMU_RAW (0x0B) at all, the packet type accel_ratio/
+gyro_ratio apply to. It reports IMU data under ext_type 0x0E instead (not
+a documented opcode in the vendored library), which base_controller.
+vendor.Rosmaster_Lib.__parse_data now handles in a second, non-vendor
+branch added alongside the original -- see that branch's comment for the
+full evidence trail. That branch's output is already SI (m/s^2, rad/s),
+so G_TO_MS2 below is 1.0, not a g's-to-m/s^2 conversion factor anymore.
+Gyro scale/sign and accel x/y sign are carried over unverified from that
+same branch -- see its comment. Only accel z's sign is corrected below,
+empirically (this board reads negative at rest; REP-103 wants +g).
 
 HARDWARE THIS TALKS TO: Yahboom YB-ERF01-V2.0 board (STM32F103RCT6) over
 USB-serial, default port name /dev/myserial (matching Rosmaster_Lib's own
@@ -121,7 +127,8 @@ from tf2_ros import TransformBroadcaster
 from base_controller.vendor.Rosmaster_Lib import Rosmaster
 from base_controller.command_safety import clamp_command
 
-G_TO_MS2 = 9.80665   # see "REMAINING GENUINE UNCERTAINTY" above -- verify on bench
+G_TO_MS2 = 1.0   # bench-verified 2026-08-30, see module docstring -- this
+                 # board's active IMU report (ext_type 0x0E) is already SI
 DEG_TO_RAD = math.pi / 180.0
 
 # Confirmed from Rosmaster_Lib.py source (class attributes on Rosmaster.__init__)
@@ -406,9 +413,21 @@ class BaseControllerNode(Node):
             imu.header.frame_id = 'imu_link'
             imu.linear_acceleration.x = ax * G_TO_MS2
             imu.linear_acceleration.y = ay * G_TO_MS2
-            imu.linear_acceleration.z = az * G_TO_MS2
-            # gyro_ratio's source comment states "+/-500dps" explicitly -> degrees/s,
-            # REP-103 requires rad/s for sensor_msgs/Imu
+            # sign flip bench-verified 2026-08-30: this board's active IMU
+            # report (ext_type 0x0E, vendor Rosmaster_Lib) reads NEGATIVE at
+            # rest; REP-103 wants +g on a level, stationary Z axis. x/y sign
+            # not independently checked (near-zero at rest either way).
+            imu.linear_acceleration.z = -az * G_TO_MS2
+            # UNVERIFIED: DEG_TO_RAD here dates from the old FUNC_REPORT_IMU_RAW
+            # (0x0B) path ("+/-500dps" per gyro_ratio's source comment), which
+            # this board's firmware never actually sends (see module docstring
+            # and vendor Rosmaster_Lib's 0x0E branch). The now-active 0x0E path
+            # scales gyro the same SI-direct way FUNC_REPORT_SPEED's vz already
+            # does elsewhere in this same firmware, which suggests rad/s
+            # already -- but that's an inference, not a bench check, so this
+            # multiply is left as-is pending Stage 10's gyro verification
+            # (rotate a known 90 degrees, compare filtered yaw): if the
+            # filtered yaw comes out ~57x off, remove this DEG_TO_RAD multiply.
             imu.angular_velocity.x = gx * DEG_TO_RAD
             imu.angular_velocity.y = gy * DEG_TO_RAD
             imu.angular_velocity.z = gz * DEG_TO_RAD
