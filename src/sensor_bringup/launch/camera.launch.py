@@ -48,22 +48,80 @@ original dual-Pi topology's launch files (camera and plant_perception
 are on the same "mission-brain" Pi there too) -- compression only helps
 where there's an actual network hop to cross, and adds pure overhead
 (compress CPU cost, zero bandwidth benefit) anywhere there isn't one.
+
+CORRECTED (2026-08-29) -- this file previously launched astra_camera via
+`Node(package='astra_camera', executable='astra_camera_node', ...)`. That
+executable does not exist: astra_camera's CMakeLists.txt only builds
+OBCameraNodeFactory as a composable-node plugin inside libastra_camera.so
+(see `rclcpp_components_register_nodes` there), meant to be loaded into a
+rclcpp_components component_container -- exactly what the vendored
+astra_camera/launch/dabai_pro.launch.py does. This file now mirrors that
+pattern instead of guessing at a plain-executable one. It also previously
+passed a `depth_registration` parameter -- the driver's own C++ only
+declares `depth_align` (astra_camera/src/ob_camera_node.cpp), so that
+setting was silently dropped and D2C alignment was never actually turning
+on, undermining plant_perception's 3D back-projection (see that node's own
+ACCURACY NOTE) even before the colour bug below.
+
+RGB BYPASS -- this unit's Astra Pro Plus colour sensor hits a libuvc
+parsing bug ("unsupported descriptor subtype VS_COLORFORMAT",
+orbbec/ros_astra_camera#135, open upstream, not something this vendored
+copy's local patches touch). Confirmed live: astra_camera_node's own log
+shows that error immediately followed by "color is not enable" -- the
+driver disables its own colour stream after the failed negotiation, so
+`/camera/color/image_raw` AND `/camera/color/camera_info` are both
+advertised but never actually publish a single message. `enable_color`
+is set False below to skip that failed attempt outright (it was going to
+retry up to `uvc_camera.retry_count` times otherwise) rather than rely on
+the driver's own fallback. v4l2_camera opens the exact same physical
+sensor through the kernel's uvcvideo driver instead of libuvc and does not
+hit this bug -- confirmed working formats via `v4l2-ctl --list-formats-ext`
+on /dev/video0 (MJPG/YUYV, multiple resolutions). It publishes on the same
+`/camera/color/image_raw` / `/camera/color/camera_info` topic names so
+nothing downstream (plant_perception, the compressed republish nodes
+below) needs to change.
+
+TODO -- v4l2_camera_node below has no `camera_info_url` set, so it
+publishes an UNCALIBRATED CameraInfo (no real fx/fy/cx/cy). That's fine
+for plant_perception's HSV colour detection but NOT fine for its 3D
+back-projection accuracy. Run `ros2 run camera_calibration
+cameracalibrator` against this sensor once you have a checkerboard and
+point `camera_info_url` at the resulting file.
 """
+import os
+import yaml
+from ament_index_python.packages import get_package_share_directory
 from launch import LaunchDescription
 from launch.actions import DeclareLaunchArgument
 from launch.substitutions import LaunchConfiguration
 from launch.conditions import IfCondition
-from launch_ros.actions import Node
+from launch_ros.actions import Node, ComposableNodeContainer
+from launch_ros.descriptions import ComposableNode
 
 
 def generate_launch_description():
     compress = LaunchConfiguration('compress')
 
+    astra_params_file = os.path.join(
+        get_package_share_directory('astra_camera'),
+        'params', 'dabai_pro_params.yaml')
+    with open(astra_params_file, 'r') as f:
+        astra_params = yaml.safe_load(f)
+
     return LaunchDescription([
-        DeclareLaunchArgument('color_width', default_value='424'),
+        # 320x240, not the old 424x240: confirmed live against this exact
+        # unit that 424x240 is not a valid DEPTH resolution at all (driver
+        # log: "format PIXEL_FORMAT_DEPTH_1_MM is not supported ... Stream
+        # will be disabled" -- its own "Supported video modes" dump lists
+        # only 160x120/320x240/640x480/1280x1024). Matching colour to the
+        # same 320x240 also means plant_detector_node's width/height-RATIO
+        # colour->depth pixel scaling (see its own module docstring) is an
+        # exact 1:1 mapping instead of an interpolated one. Keep the v4l2
+        # Node's own 'image_size' below in sync if these change.
+        DeclareLaunchArgument('color_width', default_value='320'),
         DeclareLaunchArgument('color_height', default_value='240'),
         DeclareLaunchArgument('color_fps', default_value='15'),
-        DeclareLaunchArgument('depth_width', default_value='424'),
+        DeclareLaunchArgument('depth_width', default_value='320'),
         DeclareLaunchArgument('depth_height', default_value='240'),
         DeclareLaunchArgument('depth_fps', default_value='15'),
         DeclareLaunchArgument(
@@ -75,23 +133,71 @@ def generate_launch_description():
                         'pi_hardware_and_control.launch.py should need '
                         'true.'),
 
-        Node(
-            package='astra_camera',
-            executable='astra_camera_node',
-            name='astra_camera',
+        ComposableNodeContainer(
+            name='astra_camera_container',
+            namespace='',
+            package='rclcpp_components',
+            executable='component_container',
+            composable_node_descriptions=[
+                ComposableNode(
+                    package='astra_camera',
+                    plugin='astra_camera::OBCameraNodeFactory',
+                    name='camera',
+                    namespace='camera',
+                    parameters=[astra_params, {
+                        'depth_align': True,   # see CORRECTED note above --
+                                                # NOT 'depth_registration'
+                        'enable_color': False,  # see RGB BYPASS note above
+                        'uvc_camera.enable': False,  # THE real switch: the
+                                                # libuvc colour path is
+                                                # started unconditionally
+                                                # from use_uvc_camera_
+                                                # (ob_camera_node_factory.cpp)
+                                                # whenever this is true --
+                                                # enable_color above does
+                                                # NOT gate it. dabai_pro_
+                                                # params.yaml sets this true
+                                                # by default; leaving it so
+                                                # while v4l2_camera_node
+                                                # also holds the same device
+                                                # open is what wedged the
+                                                # sensor off /dev/video*
+                                                # entirely during testing.
+                        'color_width': LaunchConfiguration('color_width'),
+                        'color_height': LaunchConfiguration('color_height'),
+                        'color_fps': LaunchConfiguration('color_fps'),
+                        'depth_width': LaunchConfiguration('depth_width'),
+                        'depth_height': LaunchConfiguration('depth_height'),
+                        'depth_fps': LaunchConfiguration('depth_fps'),
+                    }],
+                ),
+            ],
             output='screen',
+        ),
+
+        # RGB bypass -- see module docstring. Same physical sensor as
+        # astra_camera's disabled colour stream, opened via V4L2/uvcvideo
+        # instead of libuvc. image_size is a literal, not tied to the
+        # color_width/height launch args above (passing a LaunchConfiguration
+        # through launch_ros.parameter_descriptions.ParameterValue for an
+        # int-array crashes launch's parameter normalization -- tried and
+        # reverted, see git history). Kept at 320x240 to match
+        # depth_width/height's default above -- see the DeclareLaunchArgument
+        # comment for why 320x240 specifically. Update both together if
+        # either changes; this one won't follow automatically.
+        Node(
+            package='v4l2_camera', executable='v4l2_camera_node',
+            name='v4l2_color_camera', output='screen',
             parameters=[{
-                'depth_registration': True,   # align depth to colour -- required
-                                               # for plant_perception's 3D back-
-                                               # projection to be correct, see
-                                               # that node's own ACCURACY NOTE
-                'color_width': LaunchConfiguration('color_width'),
-                'color_height': LaunchConfiguration('color_height'),
-                'color_fps': LaunchConfiguration('color_fps'),
-                'depth_width': LaunchConfiguration('depth_width'),
-                'depth_height': LaunchConfiguration('depth_height'),
-                'depth_fps': LaunchConfiguration('depth_fps'),
+                'video_device': '/dev/v4l/by-id/'
+                    'usb-Sonix_Technology_Co.__Ltd._USB_2.0_Camera_SN0001-video-index0',
+                'image_size': [320, 240],
+                'camera_frame_id': 'camera_color_optical_frame',
             }],
+            remappings=[
+                ('image_raw', '/camera/color/image_raw'),
+                ('camera_info', '/camera/color/camera_info'),
+            ],
         ),
 
         # Compress the RAW output locally, for network-hop callers only --
