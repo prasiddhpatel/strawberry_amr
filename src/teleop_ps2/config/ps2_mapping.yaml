@@ -1,16 +1,29 @@
 joystick_node:
   ros__parameters:
-    # ---- axes (confirm with: ros2 topic echo /joy) ----
+    # ---- axes -- bench-verified 2026-08-30 against the real controller
+    # (generic PS2-layout USB adapter, Y/B/A/X-labelled face buttons in
+    # Triangle/Circle/Cross/Square positions), see docs/MASTER_DEPLOYMENT_
+    # COMMANDS.md Stage 8. Confirmed via ros2 topic echo /joy: axis 1 reads
+    # +1.0 on forward push (-> positive cmd.linear.x, correct as-is, no
+    # invert needed); axis 2 reads +1.0 on left push (-> positive
+    # cmd.angular.z = turn left per REP-103, correct as-is) ----
     axis_linear: 1          # left stick vertical
-    axis_angular: 2         # right stick horizontal (often 2 or 3 on adapters)
+    axis_angular: 2         # right stick horizontal
     invert_linear: false
     invert_angular: false
-    # ---- buttons ----
+    # ---- buttons -- bench-verified 2026-08-30, same session ----
     deadman_button: 6       # L1  (HOLD to drive)
     turbo_button: 7         # R1  (HOLD for fast)
     autonomy_button: 0      # X / cross (tap to toggle autonomy, deadman released)
     estop_button: 1         # circle (tap to latch e-stop)
-    reset_button: 9         # start  (tap to clear e-stop)
+    reset_button: 11        # start (tap to clear e-stop) -- WAS 9 (a guess);
+                             # bench-verified 2026-08-30 that button 9 is
+                             # actually R2 (digital press), not start -- real
+                             # start is 11. Left uncorrected, R2 (a trigger,
+                             # easy to bump while driving) would have silently
+                             # cleared a latched e-stop, and the real start
+                             # button would have done nothing. See docs/
+                             # MASTER_DEPLOYMENT_COMMANDS.md Stage 8.
     # ---- speeds ----
     # Deliberately conservative defaults for a FIRST power-on test of the
     # drivetrain (see teleop.launch.py's docstring). Raise once you've
