@@ -49,9 +49,23 @@ row_nav_node:
     # places are visible and editable together.
     # MUST match coverage_params.yaml and target_manager_params.yaml.
     row_spacing: 0.50
-    wheelbase: 0.2353            # L (m), CAD-sourced from the real yahboomcar_R2.urdf.xacro
+    wheelbase: 0.25               # L (m) -- DELIBERATELY NOT the true CAD/measured value
+                                  # (0.2353m, bench-confirmed 2026-08-31; see
+                                  # docs/MOTOR_AND_GEOMETRY_VERIFICATION.md). This is the
+                                  # planning-layer kinematic model: base_controller and both
+                                  # URDFs keep the real 0.2353m for actuation, but row_nav's
+                                  # R_min/bulb-turn math and Nav2's min_turning_radius
+                                  # (robot_bringup/config/nav2_params.yaml) deliberately use a
+                                  # rounder, slightly larger 0.25m so the planner never assumes
+                                  # a tighter turn than the real chassis can deliver. See
+                                  # docs/HEADLAND_TURN_GEOMETRY.md for the resulting R_min=0.365m
+                                  # and updated bulb-turn table. Do NOT "fix" this back to
+                                  # 0.2353 to match base_controller_params.yaml -- that sync
+                                  # requirement was intentionally retired 2026-08-31.
     max_steer_angle: 0.6         # delta_max (rad, 34.4 deg), CAD joint limit -- see
-                                  # docs/MOTOR_AND_GEOMETRY_VERIFICATION.md for the extraction
+                                  # docs/MOTOR_AND_GEOMETRY_VERIFICATION.md for the extraction.
+                                  # Unlike wheelbase above, this one DOES still match
+                                  # base_controller/both URDFs -- only wheelbase was split.
 
     # ---- RANSAC on corridor centre points ----
     ransac_iterations: 50

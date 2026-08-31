@@ -6,19 +6,31 @@ yaw rate requires nonzero speed (`dθ/dt = v·κ`, `κ = tan(δ)/L`), and curvat
 is bounded by the mechanical steering limit, giving a minimum turning radius
 
 ```
-R_min = L / tan(δ_max) = 0.2353 / tan(0.6 rad) = 0.344 m
+R_min = L / tan(δ_max) = 0.25 / tan(0.6 rad) = 0.365 m
 ```
 
-(`L` and `δ_max` are CAD-sourced from Yahboom's own `yahboomcar_R2.urdf.xacro`
-— see `docs/MOTOR_AND_GEOMETRY_VERIFICATION.md`, "Ackermann geometry", for the
-extraction. This **replaces** an earlier `R_min=0.537 m` computed from an
-unverified `L=0.25 m / δ_max=0.436 rad` — the whole table below was
-recomputed for the real, smaller `R_min`, which needs a *tighter* turn and
-therefore *less* headland space than the earlier revision of this document
-stated.)
+**UPDATED 2026-08-31 — `L` here is the PLANNING-layer wheelbase, not the true
+one.** The true CAD/measured wheelbase is `0.2353 m` (bench-confirmed again
+2026-08-31; giving the vehicle's actual tightest possible turn,
+`R_min=0.344 m` — see `docs/MOTOR_AND_GEOMETRY_VERIFICATION.md`, "Ackermann
+geometry"). `base_controller` and both URDFs still use that real value for
+actuation. This node (`row_nav_node.py`, and Nav2's `min_turning_radius` in
+`robot_bringup/config/nav2_params.yaml`) deliberately uses a rounder, more
+conservative `L=0.25 m` instead, so the *planned* maneuver never assumes a
+tighter turn than the real chassis can deliver — R_min=0.365 m here is
+intentionally a little larger (more headland space assumed) than the
+vehicle's true 0.344 m minimum. `δ_max=0.6 rad` was **not** split and is the
+same real, CAD-sourced value everywhere.
+
+(This whole page previously used the true `L=0.2353 m, R_min=0.344 m`
+directly — itself a replacement for an earlier unverified `L=0.25 m` /
+`R_min=0.537 m` that came from a *different, wrong* `δ_max=0.436 rad`. To be
+clear this isn't that old error recurring: today's planning-layer `L=0.25 m`
+pairs with the *correct* `δ_max=0.6 rad`, giving `R_min=0.365 m` —
+nowhere near the old `0.537 m`. Whole table below recomputed accordingly.)
 
 Tabletop row spacing (0.35–0.60 m) is well under the achievable turning
-**diameter** `2·R_min ≈ 0.69 m`, so a single constant-radius arc still cannot
+**diameter** `2·R_min ≈ 0.73 m`, so a single constant-radius arc still cannot
 land the vehicle exactly on the next row for most of that range. This still
 requires a two-segment maneuver.
 
@@ -83,36 +95,44 @@ negative — i.e. that combination cannot produce the desired sweep at all).
 If you ever retune this maneuver, work in terms of **ω**, not δ; do not try
 to reason about "the steering lock" directly when deriving the invariant.
 
-## Verified numerically (closed-loop simulation, not just the open-loop arc math)
+## Verified numerically
 
-Recomputed for the real, CAD-sourced `L=0.2353 m`, `R_min=0.344 m`
-(supersedes an earlier table computed for the unverified `L=0.25 m` /
-`R_min=0.537 m`):
+Recomputed 2026-08-31 for the planning-layer `L=0.25 m`, `R_min=0.365 m`
+(supersedes the previous table, which used the true `L=0.2353 m`,
+`R_min=0.344 m` — see the note above on why the two now differ):
 
 | row_spacing | φ1 | φ2 | forward extent | lateral bulge (away from final row) |
 |---|---|---|---|---|
-| 0.35 m | 120.6° | 59.4° | 0.59 m | 0.52 m |
-| 0.40 m | 125.6° | 54.4° | 0.56 m | 0.54 m |
-| 0.50 m | 136.7° | 43.3° | 0.47 m | 0.59 m |
-| 0.60 m | 150.8° | 29.2° | 0.34 m | 0.64 m |
+| 0.35 m | 118.6° | 61.4° | 0.64 m | 0.54 m |
+| 0.40 m | 123.2° | 56.8° | 0.61 m | 0.57 m |
+| 0.50 m | 133.2° | 46.8° | 0.53 m | 0.62 m |
+| 0.60 m | 145.2° | 34.8° | 0.42 m | 0.67 m |
 
-All cases land within ~1 mm of the target lateral offset with an exact 180°
-heading reversal, verified by forward-integrating the **exact discrete
-state-machine logic** used at runtime (yaw-threshold phase switching via
-odometry), not just the abstract two-arc geometry. Note the trend versus
-the earlier (incorrect-geometry) table: a *smaller* `R_min` needs *less*
-forward extent to complete a given lateral shift, but produces a
-correspondingly *larger* lateral bulge — worth having both numbers, not
-just one, when checking real headland clearance.
+All four cases land within ~0.5 mm of the target lateral offset with an exact
+180° heading reversal (0.447/0.208/0.141/0.222 mm respectively, including at
+the tightest 0.35 m spacing — the solver still converges cleanly at the new,
+larger R_min). **Verification level, stated plainly:** this table was
+recomputed by calling the actual `_arc_step`/`_bulb_turn_split` primitives
+from `row_nav_node.py` directly (not re-derived by hand, avoiding the exact
+sign-error trap that function's own docstring warns about) and densely
+sampling both arcs for the lateral-bulge peak. It has **not** been re-verified
+against the closed-loop discrete state-machine simulation (yaw-threshold phase
+switching via live odometry) that the original `R_min=0.344` table's
+"verified numerically (closed-loop simulation)" claim rested on. Re-run that
+closed-loop check before trusting this table for unattended operation. Note
+the same trend as before: a *smaller* `R_min` needs *less* forward extent but
+a *larger* lateral bulge — both numbers still matter, not just one.
 
 ## Real-world clearance requirement (must be checked against the actual tunnel/lab)
 - **Depth** (`exit_buffer 0.40 m + forward extent + vehicle length margin
-  ~0.35 m`), by `row_spacing`:
-  - 0.35 m spacing: **≈1.34 m** clear headland depth
-  - 0.40 m spacing: **≈1.31 m**
-  - 0.50 m spacing (current codebase default): **≈1.22 m**
-  - 0.60 m spacing: **≈1.09 m**
-- **Width**: the maneuver bulges **0.52–0.64 m beyond the target row**
+  ~0.35 m`), by `row_spacing` — updated 2026-08-31 for the new planning-layer
+  R_min=0.365 m (each figure is ~5-8 cm more than the previous table, since
+  the larger R_min needs more forward extent):
+  - 0.35 m spacing: **≈1.39 m** clear headland depth (was ≈1.34 m)
+  - 0.40 m spacing: **≈1.36 m** (was ≈1.31 m)
+  - 0.50 m spacing (current codebase default): **≈1.28 m** (was ≈1.22 m)
+  - 0.60 m spacing: **≈1.17 m** (was ≈1.09 m)
+- **Width**: the maneuver bulges **0.54–0.67 m beyond the target row**
   (larger for wider row spacing) before arc 2 pulls it back — if there's a
   wall, a third row, or an obstacle that close beyond the target row, this
   maneuver will not clear it. Verify both numbers against the real

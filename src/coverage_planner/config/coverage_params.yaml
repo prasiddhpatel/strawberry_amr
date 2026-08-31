@@ -8,13 +8,15 @@ coverage_planner_node:
     # NOTE: this is a SCHEMATIC route-preview margin for the RViz /coverage_path
     # visualisation and mission sequencing, NOT the real clearance the vehicle
     # needs -- that is owned by row_navigation's bulb-turn (see
-    # docs/HEADLAND_TURN_GEOMETRY.md, which computes ~1.22 m of REQUIRED real
+    # docs/HEADLAND_TURN_GEOMETRY.md, which computes ~1.28 m of REQUIRED real
     # headland depth for this Ackermann chassis at row_spacing=0.50 m: exit
-    # buffer + two-arc forward extent + vehicle-length margin -- an earlier
-    # revision of that document estimated ~1.7 m; superseded, see
-    # docs/CURRENT_STATUS_AND_NEXT_STEPS.md). This 0.6 m figure only needs to
-    # look reasonable on screen; verify the ACTUAL tunnel headland against
-    # the 1.22 m figure before autonomous operation, not against this one.
+    # buffer + two-arc forward extent + vehicle-length margin -- updated
+    # 2026-08-31 for row_navigation's new planning-layer wheelbase (0.25 m,
+    # R_min=0.365 m; was 1.22 m at the true 0.2353 m/R_min=0.344 m -- see that
+    # doc's "UPDATED 2026-08-31" note for why the planning layer no longer
+    # uses the true wheelbase). This 0.6 m figure only needs to look
+    # reasonable on screen; verify the ACTUAL tunnel headland against the
+    # 1.28 m figure before autonomous operation, not against this one.
     headland_margin: 0.6   # distance driven past row end before turning (m) -- SCHEMATIC ONLY, see note
     map_frame: map
     republish_period: 2.0

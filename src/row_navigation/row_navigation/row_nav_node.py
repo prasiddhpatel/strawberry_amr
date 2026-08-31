@@ -28,10 +28,13 @@ WHAT *IS* NEW: headland turning. A skid-steer base can pivot on the spot
 (v=0, omega!=0); an Ackermann base fundamentally cannot -- omega is only
 producible while v!=0, and is bounded by the mechanical minimum turning
 radius R_min = L / tan(delta_max). Because the tabletop row spacing
-(~0.35-0.6 m) is well under the achievable turning DIAMETER (2*R_min ~= 0.69 m
-for this chassis: L=0.2353 m, delta_max=0.6 rad/34.4 deg -- CAD-sourced from
-the real yahboomcar_R2.urdf.xacro joint origins/limits, see
-docs/MOTOR_AND_GEOMETRY_VERIFICATION.md), a single arc cannot
+(~0.35-0.6 m) is well under the achievable turning DIAMETER (2*R_min ~= 0.73 m
+for this chassis: L=0.25 m, delta_max=0.6 rad/34.4 deg -- L here is the
+planning-layer wheelbase, deliberately rounded up from the true CAD/measured
+0.2353 m (base_controller and both URDFs keep the real value; only this
+node's kinematic model uses the rounder, more conservative one -- see
+docs/HEADLAND_TURN_GEOMETRY.md and row_navigation_params.yaml's wheelbase
+comment for why), a single arc cannot
 land on the next row -- this node instead executes a verified two-arc
 "bulb turn": straight exit buffer -> arc at +delta_max -> arc at -delta_max
 (split angle solved once at startup so the two arcs land exactly on the next
@@ -162,7 +165,9 @@ class RowNavNode(Node):
         d('ransac_min_points', 3)
         # --- row-end / headland (Ackermann two-arc bulb turn) ---
         d('row_end_min_side_points', 6)
-        d('wheelbase', 0.2353)            # L, CAD-sourced (m) -- see MOTOR_AND_GEOMETRY_VERIFICATION.md
+        d('wheelbase', 0.25)               # L (m) -- planning-layer value, NOT the true CAD
+                                           # 0.2353m -- see row_navigation_params.yaml's comment
+                                           # and docs/HEADLAND_TURN_GEOMETRY.md
         d('max_steer_angle', 0.6)         # delta_max, CAD joint limit (rad, 34.4 deg)
         d('row_spacing', 0.50)            # MUST match coverage_planner's value
         d('headland_exit_buffer', 0.40)   # straight creep past row end before arcing (m)

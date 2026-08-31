@@ -33,14 +33,64 @@ an Ackermann bicycle-model command converter ourselves:
     (car_type is baked into every FUNC_MOTION packet). For R2/R2L
     specifically: vx in [-1.8, 1.8] m/s, vy in [-0.045, 0.045] m/s
     (near-zero on purpose -- an Ackermann chassis cannot strafe), vz in
-    [-3, 3] rad/s. The STM32 firmware performs its OWN internal Ackermann
-    bicycle-model conversion into rear-motor speed and front steering
-    angle. That means a separate ackermann_bridge package computing
-    delta = atan(L*omega/v) itself was duplicating logic the vendor's own
-    firmware already implements and has tested against the real hardware
-    -- trusting tested vendor code over a from-scratch reimplementation is
-    the more reliable choice, so ackermann_bridge was removed and its role
-    folded into this node (see git history for the removed package).
+    [-3, 3] rad/s.
+  * DISPROVEN 2026-08-31 (Stage 9 bench test, docs/MASTER_DEPLOYMENT_
+    COMMANDS.md): this section used to claim the STM32 firmware performs
+    its own internal Ackermann bicycle-model conversion into rear-motor
+    speed AND front steering angle, and that ackermann_bridge was removed
+    on that basis (see git history for the removed package). The rear-
+    motor-speed half held up -- commanding vz visibly differentials the
+    rear wheels, confirmed live, which also answers Stage 12's open
+    "does the firmware differential them" question: yes. The steering
+    half did not hold up: the front servo never actuates, by ANY path
+    tried -- set_car_motion's own vz, the dedicated set_akm_steering_angle()
+    and set_akm_default_angle() (the latter's write confirmed NOT landing
+    via read-back, even though AKM reads work and car_type=R2 was
+    explicitly persisted to flash), and raw set_pwm_servo() on all 4
+    channels (1-4) with the servo cable physically moved to match each
+    one (S1-S4). Serial comms to the board are confirmed healthy
+    throughout (get_akm_default_angle() returns a real firmware value;
+    set_beep() audibly beeps) -- this is not a communication problem.
+    ROOT CAUSE FOUND 2026-08-31, same session: not a dead servo or a
+    power-rail fault -- the servo connector was plugged into the YB-ERF01
+    header REVERSED. Same physical servo was moved across all 4 channels
+    during diagnosis, connector orientation unchanged each time, which is
+    why every channel failed identically (a wiring-orientation fault on
+    the one servo under test, not 4 independent channel/rail faults).
+    Reseated correctly on S1 -- set_akm_steering_angle() now visibly
+    actuates the servo, confirmed both directions match physical reality
+    (commanded -30 -> wheels swing to the robot's own left; +30 -> right,
+    matching the function's own "negative for left, positive for right"
+    doc comment in Rosmaster_Lib.py). Servo hardware and the AKM protocol
+    path are both confirmed working end to end.
+    IMPLEMENTED 2026-08-31, same session, once the hardware fix above was
+    confirmed: _cmd_vel_cb below now also computes and sends a steering
+    angle, closing the gap. Three design choices were made explicitly
+    (operator asked, not picked silently):
+      - Angle mapping: full bicycle model, delta = atan(wheelbase*vz/vx),
+        not a simpler direct-proportional mapping -- kinematically honest
+        (commanded vz is actually achieved), at the cost of not steering
+        at all below min_steer_vx (vx too close to zero for the formula
+        to be reliable; see base_controller_params.yaml's comment).
+      - Rear-wheel behaviour: steering-only. vz is NOT passed to
+        set_car_motion (always sent as 0 there) -- the front servo does
+        all the turning, rear wheels always match speed. The alternative,
+        set_akm_steering_angle(angle, ctrl_car=True) driving both rear
+        speed and steering in one firmware call, was bench-tested first
+        and produced no observable rear-motor effect from a standstill
+        (get_motor_encoder() and get_motion_data() both confirmed
+        unchanged across two separate checks 1.5s apart) -- likely because
+        it adjusts an already-active drive command rather than issuing a
+        new one, which doesn't fit this node's per-cycle command style.
+      - Stop/watchdog/shutdown now also recentre steering (_stop_and_center()),
+        not just zero velocity -- a robot stopped mid-turn otherwise sits
+        with wheels cranked to one side indefinitely.
+    Sign convention bench-confirmed, not assumed: set_akm_steering_angle()
+    is negative=left, positive=right, OPPOSITE the bicycle model's own
+    REP-103-consistent sign (positive vz/delta = left) -- _cmd_vel_cb
+    negates before the hardware call. Verified against the physical wheels
+    directly (see ROOT CAUSE section above), not just against the doc
+    comment.
   * car_type: CARTYPE_R2 = 0x05, NOT 2 -- confirmed directly from
     `self.CARTYPE_R2 = 0x05` in the vendored source. An earlier draft
     (content pasted from a different AI session into this project) claimed
@@ -222,6 +272,16 @@ class BaseControllerNode(Node):
                                               # a sudden, erroneous full-speed step command.
         d('max_linear_mps', 1.8)            # R2/R2L set_car_motion vx limit (firmware-enforced too)
         d('max_angular_radps', 3.0)         # R2/R2L set_car_motion vz limit (firmware-enforced too)
+        d('wheelbase', 0.2353)              # m -- TRUE measured value (actuation layer talks
+                                              # to the real servo). row_navigation deliberately
+                                              # uses a different 0.25m planning-layer value as of
+                                              # 2026-08-31 -- this is NOT a stale mismatch, see
+                                              # base_controller_params.yaml's wheelbase comment
+                                              # and docs/HEADLAND_TURN_GEOMETRY.md.
+        d('max_steer_angle', 0.6)           # rad -- MUST MATCH row_navigation_params.yaml and
+                                              # the URDF's max_steer property (unlike wheelbase
+                                              # above, this one was NOT split -- still 3-file sync)
+        d('min_steer_vx', 0.05)             # m/s -- see that yaml's comment
         d('publish_tf', False)              # EKF/robot_localization normally owns odom->base_link;
                                              # only enable this for a bench test with no EKF running
         d('base_frame', 'base_link')
@@ -234,6 +294,9 @@ class BaseControllerNode(Node):
         g = lambda n: self.get_parameter(n).value
         self.max_v = float(g('max_linear_mps'))
         self.max_w = float(g('max_angular_radps'))
+        self.wheelbase = float(g('wheelbase'))
+        self.max_steer_angle = float(g('max_steer_angle'))
+        self.min_steer_vx = float(g('min_steer_vx'))
         self.watchdog_timeout = float(g('cmd_watchdog_timeout_s'))
         self.max_accel = float(g('max_linear_accel_mps2'))
         self.publish_tf = bool(g('publish_tf'))
@@ -262,6 +325,9 @@ class BaseControllerNode(Node):
                                   # cycle -- clamp_command needs this, not the
                                   # requested vx, to correctly accumulate
                                   # acceleration limiting across calls
+        self.last_steer_deg = 0.0   # held across cycles where |vx| < min_steer_vx,
+                                      # see _cmd_vel_cb -- avoids recomputing
+                                      # atan(wheelbase*vz/vx) from a near-zero vx
         self.x = self.y = self.theta = 0.0
         self._last_odom_time = None
 
@@ -298,18 +364,61 @@ class BaseControllerNode(Node):
             prev_vx=self.last_vx_out, dt=dt, max_accel=self.max_accel)
         self.last_vx_out = vx
 
+        # ---- Ackermann steering angle, bicycle model -- see module docstring's
+        # "Ackermann steering" section for the full derivation/verification
+        # trail. delta = atan(wheelbase * vz / vx), REP-103 convention (positive
+        # vz = turn left = positive delta here) -- then SIGN-FLIPPED before the
+        # hardware call, because Rosmaster_Lib's set_akm_steering_angle() uses
+        # the opposite convention (negative=left, positive=right), bench-
+        # confirmed against the real servo, not assumed. ----
+        if abs(vx) >= self.min_steer_vx:
+            delta_rad = math.atan(self.wheelbase * vz / vx)
+            delta_rad = max(-self.max_steer_angle, min(self.max_steer_angle, delta_rad))
+            self.last_steer_deg = -math.degrees(delta_rad)
+        # else: |vx| below the floor where the formula is numerically
+        # unreliable -- hold self.last_steer_deg at whatever it last was,
+        # rather than computing a fresh (potentially wild) angle from a
+        # near-zero denominator.
+
         # vy is always forced to 0.0 here, not passed through from msg.linear.y:
         # an Ackermann chassis cannot strafe, and set_car_motion's own R2 range for
         # vy is a near-zero +/-0.045 m/s tolerance band, not a real capability --
         # callers should never be setting linear.y for this platform, and forcing
         # it here is a cheap defensive guard against a misconfigured upstream node.
+        #
+        # vz is always forced to 0.0 here too (NOT the clamped vz from above):
+        # steering-only turning, by deliberate choice -- the front servo does
+        # all the turning, rear wheels always match speed. set_akm_steering_
+        # angle(angle, ctrl_car=True) was bench-tested as an alternative (one
+        # firmware call driving both rear speed and steering together) and
+        # produced no observable rear-motor effect from standstill (encoders
+        # and get_motion_data() both confirmed unchanged across two checks),
+        # so it is not used here.
         if self.bot is not None:
-            self.bot.set_car_motion(vx, 0.0, vz)
+            self.bot.set_car_motion(vx, 0.0, 0.0)
+            steer_deg = max(-45.0, min(45.0, self.last_steer_deg))  # defensive
+                            # backstop against the vendor library's own hard
+                            # range; max_steer_angle above should already keep
+                            # this well inside +/-45 for any sane config value
+            self.bot.set_akm_steering_angle(steer_deg)
+
+    def _stop_and_center(self):
+        # Zero all motion AND recentre steering -- shared by the watchdog,
+        # destroy_node, and main()'s shutdown handler. Recentring here is a
+        # deliberate choice, not an oversight: without it, a robot that
+        # stops mid-turn (watchdog timeout, Ctrl+C, e-stop) would sit with
+        # its front wheels cranked to one side indefinitely, which is a
+        # surprising state for whatever drives it next to inherit.
+        if self.bot is None:
+            return
+        self.bot.set_car_motion(0.0, 0.0, 0.0)
+        self.bot.set_akm_steering_angle(0)
+        self.last_steer_deg = 0.0
 
     def _watchdog_check(self):
         elapsed = (self.get_clock().now() - self.last_cmd_time).nanoseconds / 1e9
         if elapsed > self.watchdog_timeout and self.bot is not None:
-            self.bot.set_car_motion(0.0, 0.0, 0.0)
+            self._stop_and_center()
             # Keep clamp_command's ramp state in sync with what was actually
             # commanded. Without this, last_vx_out stays at its pre-dropout
             # value while the motors are physically at 0 -- so when a real
@@ -456,7 +565,7 @@ class BaseControllerNode(Node):
     def destroy_node(self):
         if self.bot is not None:
             try:
-                self.bot.set_car_motion(0.0, 0.0, 0.0)
+                self._stop_and_center()
             except Exception:  # noqa: BLE001
                 pass
         super().destroy_node()
@@ -486,7 +595,7 @@ def main():
         # unconditional guarantee.
         if node.bot is not None:
             try:
-                node.bot.set_car_motion(0.0, 0.0, 0.0)
+                node._stop_and_center()
             except Exception:  # noqa: BLE001 -- shutting down regardless
                 pass
         node.destroy_node()

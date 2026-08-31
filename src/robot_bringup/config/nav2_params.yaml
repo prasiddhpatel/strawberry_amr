@@ -11,9 +11,14 @@
 #                       vehicle's minimum turning radius and can return paths
 #                       this Ackermann chassis cannot physically follow.
 #                       Hybrid-A* with a Dubins motion model respects
-#                       min_turning_radius (R_min = 0.344 m, CAD-sourced from the
-#                       real yahboomcar_R2.urdf.xacro -- see
-#                       docs/MOTOR_AND_GEOMETRY_VERIFICATION.md for the extraction)
+#                       min_turning_radius (R_min = 0.365 m = L/tan(delta_max)
+#                       with the PLANNING-layer L=0.25 m, delta_max=0.6 rad --
+#                       deliberately rounder/larger than the true CAD/measured
+#                       wheelbase (0.2353 m, R_min=0.344 m -- base_controller
+#                       and both URDFs still use that real value for actuation).
+#                       See docs/HEADLAND_TURN_GEOMETRY.md and
+#                       row_navigation_params.yaml's wheelbase comment for why
+#                       the two layers deliberately differ)
 #                       and
 #                       forward-only curvature (no reverse -- we do not want
 #                       Nav2 planning a reverse approach into a strawberry
@@ -130,7 +135,9 @@ controller_server:
       # impossible for this chassis; an Ackermann vehicle cannot rotate in
       # place, so RPP must never be allowed to plan one) ---
       use_rotate_to_heading: false
-      min_turning_radius: 0.344       # R_min = L/tan(delta_max), CAD-sourced; see MOTOR_AND_GEOMETRY_VERIFICATION.md re: sourcing
+      min_turning_radius: 0.365       # R_min = L/tan(delta_max), planning-layer L=0.25m (NOT
+                                       # the true 0.2353m -- see header note above and
+                                       # docs/HEADLAND_TURN_GEOMETRY.md)
       max_angular_accel: 1.0
       allow_reversing: false          # matches the Hybrid planner's forward-only
                                        # (Dubins) motion model below -- do not set
@@ -156,7 +163,9 @@ planner_server:
                                           # on the controller above; do not change one
                                           # without the other
       angle_quantization_bins: 72
-      minimum_turning_radius: 0.344      # R_min = L/tan(delta_max), CAD-sourced; see MOTOR_AND_GEOMETRY_VERIFICATION.md re: sourcing
+      minimum_turning_radius: 0.365      # R_min = L/tan(delta_max), planning-layer L=0.25m (NOT
+                                          # the true 0.2353m -- see header note above and
+                                          # docs/HEADLAND_TURN_GEOMETRY.md)
       reverse_penalty: 2.0
       change_penalty: 0.0
       non_straight_penalty: 1.2

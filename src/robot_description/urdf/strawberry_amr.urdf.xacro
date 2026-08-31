@@ -52,9 +52,16 @@
        source from the CAD file, same answer) — the most trustworthy
        figure of the set.
 
-       Update the `xacro:property` values below AND the matching params in
-       row_navigation_params.yaml together if you ever re-derive these
-       (e.g. after a bench confirmation that shifts max_steer slightly).
+       Update the `xacro:property` values below AND base_controller_params.yaml
+       (both hold the true actuation-layer geometry, and must stay matched)
+       if you ever re-derive these (e.g. after a bench confirmation that
+       shifts max_steer slightly). wheelbase itself was bench-confirmed
+       again 2026-08-31: exactly 0.2353m, matches CAD exactly.
+       NOTE row_navigation_params.yaml's wheelbase is NO LONGER kept equal
+       to this one as of 2026-08-31 — it deliberately uses a rounder,
+       more conservative 0.25m planning-layer value instead (see
+       docs/HEADLAND_TURN_GEOMETRY.md). max_steer_angle was NOT split and
+       still must match everywhere, including there.
        base_len/base_wid/base_hgt/clearance below are still a body-envelope
        ESTIMATE, not extracted from the real URDF's mesh bounding box —
        fine for a rough Nav2 footprint, but if you need a precise

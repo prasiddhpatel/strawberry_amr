@@ -158,9 +158,22 @@ R_min = L / tan(max_steer) = 0.2353 / tan(0.6) = 0.344 m
 This **supersedes** the earlier `L=0.25 m, front_track=0.195 m,
 max_steer=0.436 rad, R_min=0.537 m` figures used throughout an earlier
 revision of this codebase — those traced back to an unverified source (see
-"Chassis dimension sourcing" below for the full history), and are now
+"Chassis dimension sourcing" below for the full history), and were
 replaced everywhere (URDF, `row_navigation_params.yaml`, `nav2_params.yaml`)
 with the numbers above.
+
+> **ADDENDUM 2026-08-31 — if you're reading "wheelbase L=0.2353 m" here and
+> then find `row_navigation_params.yaml` says `wheelbase: 0.25`, that is
+> NOT the old unverified-source error above recurring.** `L=0.2353 m` was
+> bench-confirmed again today (operator measurement, exact CAD match) and
+> remains the true value used by `base_controller` and both URDFs for real
+> actuation. Separately and deliberately, `row_navigation` and Nav2's
+> `min_turning_radius` now use a rounder, more conservative planning-layer
+> `L=0.25 m` (giving `R_min=0.365 m`, vs. the true `R_min=0.344 m` here) so
+> the planned maneuver never assumes a tighter turn than the chassis can
+> actually deliver. `max_steer=0.6 rad` was **not** split — still `0.6 rad`
+> everywhere. Full reasoning and updated bulb-turn numbers:
+> `docs/HEADLAND_TURN_GEOMETRY.md`.
 
 **Cross-check, not just a single source:** `rear_track=0.1685 m` from the
 CAD file independently corroborates a "~0.169 m" figure that appeared
