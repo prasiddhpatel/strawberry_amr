@@ -12,11 +12,6 @@ No arm/harvest logic — the 5-DOF arm is a separate, not-yet-confirmed
 companion project (see Section 4).
 
 **Start here:
-[`docs/MASTER_DEPLOYMENT_COMMANDS.md`](docs/MASTER_DEPLOYMENT_COMMANDS.md)**
-— every bash command, start to finish, one continuous sequence: OS
-install on both machines, ROS 2 Humble, Gazebo, every dependency, the
-build, network/udev setup, hardware verification, every calibration
-step, and all three operating modes, in order. **Or**
 [`ALL_IN_ONE_DEPLOYMENT_GUIDE.md`](ALL_IN_ONE_DEPLOYMENT_GUIDE.md) — the
 same procedure with the full reasoning behind each step, for when you
 want to understand *why*, not just *what to type*. The specialist guides
@@ -25,8 +20,7 @@ reference for each topic (troubleshooting depth, edge cases, the full
 reasoning behind each design choice) — you shouldn't need to leave the
 master commands guide on the critical path, but these are where to go if
 something's not behaving as expected:
-[`docs/CURRENT_STATUS_AND_NEXT_STEPS.md`](docs/CURRENT_STATUS_AND_NEXT_STEPS.md)
-(honest status and a day-by-day plan; partially superseded, see its own notice),
+
 [`docs/SENSOR_CALIBRATION_AND_BRINGUP_GUIDE.md`](docs/SENSOR_CALIBRATION_AND_BRINGUP_GUIDE.md),
 [`docs/CAMERA_ANGLE_AND_HSV_CALIBRATION_GUIDE.md`](docs/CAMERA_ANGLE_AND_HSV_CALIBRATION_GUIDE.md),
 [`GAZEBO_SIMULATION_GUIDE.md`](GAZEBO_SIMULATION_GUIDE.md),
@@ -37,10 +31,7 @@ for the full reasoning behind the primary Pi+Orin topology — node
 placement, network, safety trade-offs, and the new continuous
 explore-and-map mode for a genuinely
 unknown tunnel,
-[`SKILLS_REVIEW_FINDINGS.md`](SKILLS_REVIEW_FINDINGS.md), which documents
-a structured review pass against a published robotics best-practices
-skill set — what was found and fixed, what was already sound, and what
-was deliberately left out of scope with reasoning,
+
 [`docs/GL_FOPID_RL_TUNING_GUIDE.md`](docs/GL_FOPID_RL_TUNING_GUIDE.md),
 reinforcement-learning search for `row_navigation`'s existing GL-FOPID
 gains via Gazebo,
@@ -55,10 +46,6 @@ tagged as verified / measure-it-yourself / tune-on-hardware / must-set.
 **For a complete written account of the system** — architecture,
 hardware verification trail, every bug found and how, and the honest list
 of what is *not* verified — see
-[`docs/TECHNICAL_REPORT.md`](docs/TECHNICAL_REPORT.md). It also documents
-**four verified divergences between this build and the thesis report** —
-chiefly skid-steer (thesis) vs Ackermann (built) — that should be
-reconciled before submission.
 
 Optional perception enhancement (post-commissioning, training-free):
 [`docs/ZERO_SHOT_PERCEPTION_GUIDE.md`](docs/ZERO_SHOT_PERCEPTION_GUIDE.md)
@@ -234,14 +221,6 @@ rosdep install --from-paths src -y --ignore-src
 colcon build --symlink-install
 source install/setup.bash
 ```
-Full explanation of every step, in order, with verification commands
-after each one:
-[`docs/MASTER_DEPLOYMENT_COMMANDS.md`](docs/MASTER_DEPLOYMENT_COMMANDS.md)
-Stages 1–8.
-
-**Legacy (dual-Pi)** — see `DEPLOYMENT_GUIDE.md` for the equivalent
-`install_deps.sh` / `setup_udev_rules.sh` / `setup_network.sh` sequence
-on that topology instead.
 
 ## 9. Run
 
@@ -276,8 +255,6 @@ ros2 launch robot_bringup bench.launch.py         # indoor row-follow + SLAM, no
 ros2 launch robot_bringup full_robot.launch.py    # full stack, single host
 ```
 
-Every command, start to finish, both topologies:
-[`docs/MASTER_DEPLOYMENT_COMMANDS.md`](docs/MASTER_DEPLOYMENT_COMMANDS.md).
 
 ### PS2 joypad
 Hold **L1** (deadman) to drive; tap **X** (deadman released) to toggle autonomy;
